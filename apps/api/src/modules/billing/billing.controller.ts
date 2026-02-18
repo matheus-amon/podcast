@@ -1,7 +1,10 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
-import { billing } from "../../db/schema";
+import { billing, billingStatusEnum } from "../../db/schema";
 import { eq, desc, sum } from "drizzle-orm";
+
+// Type helper from enum
+type BillingStatus = typeof billingStatusEnum.enumValues[number];
 
 export const billingRoutes = new Elysia({ prefix: "/billing" })
     .get("/", async () => {
@@ -41,7 +44,7 @@ export const billingRoutes = new Elysia({ prefix: "/billing" })
         const [updated] = await db.update(billing)
             .set({
                 ...body,
-                status: body.status as any,
+                status: body.status as BillingStatus | undefined,
             })
             .where(eq(billing.id, parseInt(id)))
             .returning();

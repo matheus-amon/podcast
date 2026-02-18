@@ -11,16 +11,16 @@ export const dashboardRoutes = new Elysia({ prefix: "/dashboard" })
         // 2. Active Episodes (Not Published)
         const [activeEpisodesResult] = await db.select({ value: count() }).from(episodes).where(sql`${episodes.status} != 'PUBLISHED'`);
 
-        // 3. Revenue (Current Month)
+        // 3. Revenue (Current Month) - Use date string for date column comparison
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
-        const dateStr = startOfMonth.toISOString().split('T')[0];
+        const startDateStr = startOfMonth.toISOString().split('T')[0]; // YYYY-MM-DD format
 
         const [revenueResult] = await db.select({ value: sql<number>`sum(${budget.amount})` })
             .from(budget)
             .where(and(
                 eq(budget.type, 'INCOME'),
-                sql`${budget.date} >= ${dateStr}`
+                gte(budget.date, startDateStr!)
             ));
 
         // 4. Upcoming Events (Next 7 days)
@@ -43,20 +43,20 @@ export const dashboardRoutes = new Elysia({ prefix: "/dashboard" })
     .get("/charts/revenue", async () => {
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
-        const dateStr = startOfMonth.toISOString().split('T')[0];
+        const startDateStr = startOfMonth.toISOString().split('T')[0]; // YYYY-MM-DD format
 
         const [currentRevenue] = await db.select({ value: sql<number>`sum(${budget.amount})` })
             .from(budget)
             .where(and(
                 eq(budget.type, 'INCOME'),
-                sql`${budget.date} >= ${dateStr}`
+                gte(budget.date, startDateStr!)
             ));
 
         const [currentExpense] = await db.select({ value: sql<number>`sum(${budget.amount})` })
             .from(budget)
             .where(and(
                 eq(budget.type, 'EXPENSE'),
-                sql`${budget.date} >= ${dateStr}`
+                gte(budget.date, startDateStr!)
             ));
 
         return [

@@ -1,7 +1,11 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
-import { budget, budgetTemplates } from "../../db/schema";
+import { budget, budgetTemplates, budgetTypeEnum, budgetStatusEnum } from "../../db/schema";
 import { eq, desc, sum, sql } from "drizzle-orm";
+
+// Type helpers from enum
+type BudgetType = typeof budgetTypeEnum.enumValues[number];
+type BudgetStatus = typeof budgetStatusEnum.enumValues[number];
 
 export const budgetRoutes = new Elysia({ prefix: "/budget" })
     .get("/", async () => {
@@ -12,18 +16,22 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
         const income = await db.select({ value: sum(budget.amount) }).from(budget).where(eq(budget.type, 'INCOME'));
         const expense = await db.select({ value: sum(budget.amount) }).from(budget).where(eq(budget.type, 'EXPENSE'));
 
+        // Fix: Handle null results properly with optional chaining
+        const incomeValue = income[0]?.value ? Number(income[0].value) : 0;
+        const expenseValue = expense[0]?.value ? Number(expense[0].value) : 0;
+
         return {
-            totalIncome: income[0]?.value || 0,
-            totalExpense: expense[0]?.value || 0,
-            balance: (Number(income[0]?.value) || 0) - (Number(expense[0]?.value) || 0)
+            totalIncome: incomeValue,
+            totalExpense: expenseValue,
+            balance: incomeValue - expenseValue
         };
     })
     .post("/", async ({ body }) => {
         const [newEntry] = await db.insert(budget).values({
             ...body,
             date: body.date ? body.date : new Date().toISOString().split('T')[0], // YYYY-MM-DD
-            type: body.type as any,
-            status: body.status as any,
+            type: body.type as BudgetType | undefined,
+            status: body.status as BudgetStatus | undefined,
         }).returning();
         return newEntry;
     }, {
@@ -42,8 +50,8 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
         const [updated] = await db.update(budget)
             .set({
                 ...body,
-                type: body.type as any,
-                status: body.status as any,
+                type: body.type as BudgetType | undefined,
+                status: body.status as BudgetStatus | undefined,
             })
             .where(eq(budget.id, parseInt(id)))
             .returning();
@@ -96,7 +104,7 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
         for (const item of template.items) {
             const [newItem] = await db.insert(budget).values({
                 ...item,
-                type: item.type as any,
+                type: item.type as BudgetType | undefined,
                 status: 'PLANNED', // Default status for applied templates
                 date: new Date().toISOString().split('T')[0],
             }).returning();

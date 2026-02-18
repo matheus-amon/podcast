@@ -1,7 +1,12 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
-import { leads, leadInteractions } from "../../db/schema";
+import { leads, leadInteractions, roleEnum, leadStatusEnum, leadInteractionTypeEnum } from "../../db/schema";
 import { eq, desc } from "drizzle-orm";
+
+// Type helpers from enum
+type Role = typeof roleEnum.enumValues[number];
+type LeadStatus = typeof leadStatusEnum.enumValues[number];
+type LeadInteractionType = typeof leadInteractionTypeEnum.enumValues[number];
 
 export const leadsRoutes = new Elysia({ prefix: "/leads" })
     .get("/", async () => {
@@ -19,8 +24,8 @@ export const leadsRoutes = new Elysia({ prefix: "/leads" })
         async ({ body }) => {
             const [newLead] = await db.insert(leads).values({
                 ...body,
-                role: body.role as "GUEST" | "HOST" | "PRODUCER" | undefined,
-                status: body.status as "PROSPECT" | "CONTACTED" | "CONFIRMED" | "RECORDED" | undefined,
+                role: body.role as Role | undefined,
+                status: body.status as LeadStatus | undefined,
                 tags: body.tags || [],
             }).returning();
             return newLead;
@@ -47,8 +52,8 @@ export const leadsRoutes = new Elysia({ prefix: "/leads" })
             const [updatedLead] = await db.update(leads)
                 .set({
                     ...body,
-                    role: body.role as "GUEST" | "HOST" | "PRODUCER" | undefined,
-                    status: body.status as "PROSPECT" | "CONTACTED" | "CONFIRMED" | "RECORDED" | undefined,
+                    role: body.role as Role | undefined,
+                    status: body.status as LeadStatus | undefined,
                 })
                 .where(eq(leads.id, parseInt(id)))
                 .returning();
@@ -86,7 +91,7 @@ export const leadsRoutes = new Elysia({ prefix: "/leads" })
             const [newInteraction] = await db.insert(leadInteractions).values({
                 leadId: parseInt(id),
                 content: body.content,
-                type: body.type as "EMAIL" | "CALL" | "MESSAGE" | "MEETING" | "OTHER" | undefined,
+                type: body.type as LeadInteractionType | undefined,
                 date: new Date(),
             }).returning();
 

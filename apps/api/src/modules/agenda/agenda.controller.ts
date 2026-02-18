@@ -1,7 +1,12 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
-import { agenda, episodes, scripts, productionTasks } from "../../db/schema";
+import { agenda, episodes, scripts, productionTasks, eventTypeEnum, episodeStatusEnum, taskStatusEnum } from "../../db/schema";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
+
+// Type helpers from enum
+type EventType = typeof eventTypeEnum.enumValues[number];
+type EpisodeStatus = typeof episodeStatusEnum.enumValues[number];
+type TaskStatus = typeof taskStatusEnum.enumValues[number];
 
 export const agendaRoutes = new Elysia({ prefix: "/agenda" })
     // --- Events (Calendar) ---
@@ -10,6 +15,10 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
         if (query.start) whereClause.push(gte(agenda.startDate, new Date(query.start)));
         if (query.end) whereClause.push(lte(agenda.endDate, new Date(query.end)));
 
+        // Fix: Handle empty whereClause to avoid and() failure
+        if (whereClause.length === 0) {
+            return await db.select().from(agenda);
+        }
         return await db.select().from(agenda).where(and(...whereClause));
     })
     .post("/events", async ({ body }) => {
@@ -17,7 +26,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
             ...body,
             startDate: new Date(body.startDate),
             endDate: new Date(body.endDate),
-            type: body.type as any,
+            type: body.type as EventType | undefined,
         }).returning();
         return newEvent;
     }, {
@@ -48,7 +57,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
     .post("/episodes", async ({ body }) => {
         const [newEpisode] = await db.insert(episodes).values({
             ...body,
-            status: body.status as any,
+            status: body.status as EpisodeStatus | undefined,
             publishDate: body.publishDate ? new Date(body.publishDate) : undefined,
         }).returning();
         return newEpisode;
@@ -66,7 +75,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
         const [updated] = await db.update(episodes)
             .set({
                 ...body,
-                status: body.status as any,
+                status: body.status as EpisodeStatus | undefined,
                 publishDate: body.publishDate ? new Date(body.publishDate) : undefined,
             })
             .where(eq(episodes.id, parseInt(id)))
@@ -142,7 +151,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
     .put("/tasks/:id", async ({ params: { id }, body }) => {
         const [updated] = await db.update(productionTasks)
             .set({
-                status: body.status as any,
+                status: body.status as TaskStatus | undefined,
             })
             .where(eq(productionTasks.id, parseInt(id)))
             .returning();

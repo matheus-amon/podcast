@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { whitelabelConfig } from "../../db/schema";
-import { sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 export const whitelabelRoutes = new Elysia({ prefix: "/whitelabel" })
     .get("/config", async () => {
@@ -26,7 +26,7 @@ export const whitelabelRoutes = new Elysia({ prefix: "/whitelabel" })
             if (exists) {
                 const [updated] = await db.update(whitelabelConfig)
                     .set(body)
-                    .where(sql`id = ${exists.id}`)
+                    .where(eq(whitelabelConfig.id, exists.id))
                     .returning();
                 return updated;
             } else {
