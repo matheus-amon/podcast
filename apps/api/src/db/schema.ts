@@ -1,4 +1,5 @@
-import { pgTable, serial, text, timestamp, doublePrecision, date, boolean, integer, pgEnum, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, doublePrecision, date, boolean, integer, pgEnum, jsonb, index } from 'drizzle-orm/pg-core';
+import { relations } from 'drizzle-orm';
 
 // Enums
 export const roleEnum = pgEnum('role', ['GUEST', 'HOST', 'PRODUCER']);
@@ -26,7 +27,11 @@ export const leads = pgTable('leads', {
     notes: text('notes'),
     lastContact: timestamp('last_contact'),
     createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+    idx_leads_email: index('idx_leads_email').on(table.email),
+    idx_leads_status: index('idx_leads_status').on(table.status),
+    idx_leads_created_at: index('idx_leads_created_at').on(table.createdAt.desc()),
+}));
 
 export const leadInteractionTypeEnum = pgEnum('lead_interaction_type', ['EMAIL', 'CALL', 'MESSAGE', 'MEETING', 'OTHER']);
 
@@ -38,7 +43,10 @@ export const leadInteractions = pgTable('lead_interactions', {
     content: text('content').notNull(),
     date: timestamp('date').defaultNow(),
     createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+    idx_lead_interactions_lead_id: index('idx_lead_interactions_lead_id').on(table.leadId),
+    idx_lead_interactions_date: index('idx_lead_interactions_date').on(table.date.desc()),
+}));
 
 // Episodes (Content)
 export const episodes = pgTable('episodes', {
@@ -50,7 +58,11 @@ export const episodes = pgTable('episodes', {
     status: episodeStatusEnum('status').default('PLANNED'),
     publishDate: timestamp('publish_date'),
     createdAt: timestamp('created_at').defaultNow(),
-});
+    updatedAt: timestamp('updated_at').defaultNow(),
+}, (table) => ({
+    idx_episodes_status: index('idx_episodes_status').on(table.status),
+    idx_episodes_publish_date: index('idx_episodes_publish_date').on(table.publishDate.desc()),
+}));
 
 // Scripts (Content Creation)
 export const scripts = pgTable('scripts', {
@@ -76,7 +88,11 @@ export const agenda = pgTable('agenda', {
     participants: jsonb('participants'), // Array of emails or names
     color: text('color').default('#3B82F6'),
     createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+    idx_agenda_start_date: index('idx_agenda_start_date').on(table.startDate.desc()),
+    idx_agenda_lead_id: index('idx_agenda_lead_id').on(table.leadId),
+    idx_agenda_episode_id: index('idx_agenda_episode_id').on(table.episodeId),
+}));
 
 // Production Tasks
 export const productionTasks = pgTable('production_tasks', {
@@ -87,7 +103,10 @@ export const productionTasks = pgTable('production_tasks', {
     assignee: text('assignee'),
     dueDate: timestamp('due_date'),
     createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+    idx_production_tasks_episode_id: index('idx_production_tasks_episode_id').on(table.episodeId),
+    idx_production_tasks_status: index('idx_production_tasks_status').on(table.status),
+}));
 
 // Budget (Finance/Expenses)
 export const budget = pgTable('budget', {
@@ -101,7 +120,12 @@ export const budget = pgTable('budget', {
     status: budgetStatusEnum('status').default('PENDING'),
     connectedEpisodeId: integer('connected_episode_id').references(() => episodes.id),
     createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+    idx_budget_type: index('idx_budget_type').on(table.type),
+    idx_budget_category: index('idx_budget_category').on(table.category),
+    idx_budget_date: index('idx_budget_date').on(table.date.desc()),
+    idx_budget_episode_id: index('idx_budget_episode_id').on(table.connectedEpisodeId),
+}));
 
 // Budget Templates (Recurring Items)
 export const budgetTemplates = pgTable('budget_templates', {
@@ -121,7 +145,10 @@ export const billing = pgTable('billing', {
     invoiceNumber: text('invoice_number'),
     subscriptionPlan: text('subscription_plan'), // BASIC, PRO, ENTERPRISE
     createdAt: timestamp('created_at').defaultNow(),
-});
+}, (table) => ({
+    idx_billing_status: index('idx_billing_status').on(table.status),
+    idx_billing_due_date: index('idx_billing_due_date').on(table.dueDate),
+}));
 
 // Metrics (Analytics)
 export const metrics = pgTable('metrics', {
@@ -144,3 +171,63 @@ export const whitelabelConfig = pgTable('whitelabel_config', {
     subdomain: text('subdomain'),
     updatedAt: timestamp('updated_at').defaultNow(),
 });
+
+// ============================================================================
+// Relations
+// ============================================================================
+
+// Leads ↔ LeadInteractions (one-to-many)
+export const leadsRelations = relations(leads, ({ many }) => ({
+    interactions: many(leadInteractions),
+    agendaEvents: many(agenda),
+}));
+
+export const leadInteractionsRelations = relations(leadInteractions, ({ one }) => ({
+    lead: one(leads, {
+        fields: [leadInteractions.leadId],
+        references: [leads.id],
+    }),
+}));
+
+// Episodes ↔ Scripts, Agenda, Budget, ProductionTasks (one-to-many)
+export const episodesRelations = relations(episodes, ({ many }) => ({
+    scripts: many(scripts),
+    agendaEvents: many(agenda),
+    budgetEntries: many(budget),
+    productionTasks: many(productionTasks),
+}));
+
+export const scriptsRelations = relations(scripts, ({ one }) => ({
+    episode: one(episodes, {
+        fields: [scripts.episodeId],
+        references: [episodes.id],
+    }),
+}));
+
+// Agenda ↔ Leads, Episodes (many-to-one)
+export const agendaRelations = relations(agenda, ({ one }) => ({
+    lead: one(leads, {
+        fields: [agenda.leadId],
+        references: [leads.id],
+    }),
+    episode: one(episodes, {
+        fields: [agenda.episodeId],
+        references: [episodes.id],
+    }),
+}));
+
+// Budget ↔ Episodes (many-to-one)
+export const budgetRelations = relations(budget, ({ one }) => ({
+    episode: one(episodes, {
+        fields: [budget.connectedEpisodeId],
+        references: [episodes.id],
+    }),
+}));
+
+// ProductionTasks ↔ Episodes (many-to-one)
+export const productionTasksRelations = relations(productionTasks, ({ one }) => ({
+    episode: one(episodes, {
+        fields: [productionTasks.episodeId],
+        references: [episodes.id],
+    }),
+}));
