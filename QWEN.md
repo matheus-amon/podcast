@@ -4,6 +4,7 @@
 ## Active Technologies
 - TypeScript 5.x, Bun 1.3.6 + ElysiaJS 1.4, Drizzle ORM 0.45, Next.js 16, React 19 (001-fix-god-debug)
 - PostgreSQL 15 (via docker-compose) (001-fix-god-debug)
+- TypeScript 5.x + Bun 1.3.6, ElysiaJS 1.4, Drizzle ORM 0.45 (001-hexagonal-backend-refactor)
 
 ## Recent Changes
 - 001-fix-god-debug: Added TypeScript 5.x, Bun 1.3.6 + ElysiaJS 1.4, Drizzle ORM 0.45, Next.js 16, React 19

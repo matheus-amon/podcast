@@ -16,8 +16,11 @@ export const leads = pgTable('leads', {
     id: serial('id').primaryKey(),
     name: text('name').notNull(),
     email: text('email').notNull(),
+    phone: text('phone'),
     role: roleEnum('role').default('GUEST'),
     status: leadStatusEnum('status').default('PROSPECT'),
+    source: text('source').default('unknown'),
+    assignedTo: text('assigned_to'),
     company: text('company'),
     position: text('position'),
     avatarUrl: text('avatar_url'),
@@ -27,10 +30,14 @@ export const leads = pgTable('leads', {
     notes: text('notes'),
     lastContact: timestamp('last_contact'),
     createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+    deletedAt: timestamp('deleted_at'),
 }, (table) => ({
     idx_leads_email: index('idx_leads_email').on(table.email),
     idx_leads_status: index('idx_leads_status').on(table.status),
     idx_leads_created_at: index('idx_leads_created_at').on(table.createdAt.desc()),
+    idx_leads_assigned_to: index('idx_leads_assigned_to').on(table.assignedTo),
+    idx_leads_source: index('idx_leads_source').on(table.source),
 }));
 
 export const leadInteractionTypeEnum = pgEnum('lead_interaction_type', ['EMAIL', 'CALL', 'MESSAGE', 'MEETING', 'OTHER']);

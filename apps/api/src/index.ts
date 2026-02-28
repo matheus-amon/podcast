@@ -2,12 +2,15 @@ import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { errorMiddleware } from "./middleware/error.middleware";
 import { loggerMiddleware } from "./middleware/logger.middleware";
-import { leadsRoutes } from "./modules/leads/leads.controller";
+import { createLeadsModule } from "./modules/leads/leads.module";
 import { agendaRoutes } from "./modules/agenda/agenda.controller";
 import { budgetRoutes } from "./modules/budget/budget.controller";
 import { billingRoutes } from "./modules/billing/billing.controller";
 import { dashboardRoutes } from "./modules/dashboard/dashboard.controller";
 import { whitelabelRoutes } from "./modules/whitelabel/whitelabel.controller";
+
+// Create Leads module with hexagonal architecture
+const leadsModule = createLeadsModule();
 
 const app = new Elysia()
     .use(swagger())
@@ -22,7 +25,7 @@ const app = new Elysia()
     })
     .group("/api", (app) =>
         app
-            .use(leadsRoutes)
+            .use(leadsModule.routes)  // New hexagonal module
             .use(agendaRoutes)
             .use(budgetRoutes)
             .use(billingRoutes)
