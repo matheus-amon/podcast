@@ -83,6 +83,8 @@ export const scripts = pgTable('scripts', {
 });
 
 // Agenda (Events/Calendar)
+export const eventStatusEnum = pgEnum('event_status', ['SCHEDULED', 'IN_PROGRESS', 'COMPLETED', 'CANCELLED']);
+
 export const agenda = pgTable('agenda', {
     id: serial('id').primaryKey(),
     title: text('title').notNull(),
@@ -90,15 +92,19 @@ export const agenda = pgTable('agenda', {
     startDate: timestamp('start_date').notNull(),
     endDate: timestamp('end_date').notNull(),
     type: eventTypeEnum('type').default('MEETING'),
+    status: eventStatusEnum('status').default('SCHEDULED'),
     leadId: integer('lead_id').references(() => leads.id),
     episodeId: integer('episode_id').references(() => episodes.id), // Link event to episode
     participants: jsonb('participants'), // Array of emails or names
     color: text('color').default('#3B82F6'),
     createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+    deletedAt: timestamp('deleted_at'),
 }, (table) => ({
     idx_agenda_start_date: index('idx_agenda_start_date').on(table.startDate.desc()),
     idx_agenda_lead_id: index('idx_agenda_lead_id').on(table.leadId),
     idx_agenda_episode_id: index('idx_agenda_episode_id').on(table.episodeId),
+    idx_agenda_status: index('idx_agenda_status').on(table.status),
 }));
 
 // Production Tasks
@@ -238,3 +244,6 @@ export const productionTasksRelations = relations(productionTasks, ({ one }) => 
         references: [episodes.id],
     }),
 }));
+
+// WhitelabelConfig (no relations needed - singleton config table)
+export const whitelabelConfigRelations = relations(whitelabelConfig, () => ({}));

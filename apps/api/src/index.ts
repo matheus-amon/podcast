@@ -3,14 +3,15 @@ import { swagger } from "@elysiajs/swagger";
 import { errorMiddleware } from "./middleware/error.middleware";
 import { loggerMiddleware } from "./middleware/logger.middleware";
 import { createLeadsModule } from "./modules/leads/leads.module";
+import { createWhitelabelModule } from "./modules/whitelabel/whitelabel.module";
 import { agendaRoutes } from "./modules/agenda/agenda.controller";
 import { budgetRoutes } from "./modules/budget/budget.controller";
 import { billingRoutes } from "./modules/billing/billing.controller";
 import { dashboardRoutes } from "./modules/dashboard/dashboard.controller";
-import { whitelabelRoutes } from "./modules/whitelabel/whitelabel.controller";
 
-// Create Leads module with hexagonal architecture
+// Create modules with hexagonal architecture
 const leadsModule = createLeadsModule();
+const whitelabelModule = createWhitelabelModule();
 
 const app = new Elysia()
     .use(swagger())
@@ -25,12 +26,12 @@ const app = new Elysia()
     })
     .group("/api", (app) =>
         app
-            .use(leadsModule.routes)  // New hexagonal module
+            .use(leadsModule.routes)      // New hexagonal module
+            .use(whitelabelModule.routes) // New hexagonal module
             .use(agendaRoutes)
             .use(budgetRoutes)
             .use(billingRoutes)
             .use(dashboardRoutes)
-            .use(whitelabelRoutes)
     )
     .listen(3001);
 
