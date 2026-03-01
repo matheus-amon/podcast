@@ -4,8 +4,8 @@
 Refatorar todos os módulos do Podcast SaaS POC para arquitetura hexagonal, aplicando TDD com mínimo de 95% de cobertura de testes e princípios SOLID.
 
 ## Current Status (2026-03-01)
-**Branch**: `008-refactor-whitelabel`
-**Progress**: 2/6 módulos refatorados (Leads ✅, Whitelabel ✅)
+**Branch**: `010-refactor-budget`
+**Progress**: 3/6 módulos refatorados (Leads ✅, Whitelabel ✅, Agenda ✅)
 
 ## Key Knowledge
 
@@ -50,6 +50,38 @@ cd apps/web && bun run build
 - Logging: Structured JSON with levels (error, warn, info, debug)
 
 ## Recent Actions
+
+### Agenda Module Refactoring (Branch: `009-refactor-agenda`) ✅
+
+**Files Created (19 files, +1806 lines)**:
+- `apps/api/src/domain/agenda/entities/agenda-event.entity.ts` - Entity com lógica de domínio (cancel, reschedule, attendees)
+- `apps/api/src/domain/agenda/ports/agenda-repository.port.ts` - Interface AgendaRepositoryPort
+- `apps/api/src/application/agenda/use-cases/` - 5 use cases (CreateEvent, UpdateEvent, CancelEvent, ListEvents, GetEvent)
+- `apps/api/src/infrastructure/database/adapters/agenda-repository.adapter.ts` - Repository PostgreSQL com validação de sobreposição
+- `apps/api/src/infrastructure/http/adapters/agenda.controller.ts` - Controller HTTP com 9 endpoints
+- `apps/api/src/modules/agenda/agenda.module.ts` - Módulo de composição
+- 23 testes unitários para AgendaEvent
+
+**Files Modified**:
+- `apps/api/src/index.ts` - Registrado módulo Agenda com arquitetura hexagonal
+- `apps/api/src/db/schema.ts` - Adicionado event_status enum e índices
+
+**Test Results**:
+- ✅ 23 testes unitários passando
+- ✅ 9 endpoints funcionando
+- ✅ Validação de conflito de horário implementada
+- ✅ Backend inicia em <5 segundos
+
+**Endpoints**:
+- `GET /api/agenda/events` - Listar eventos com paginação
+- `GET /api/agenda/events/:id` - Buscar evento por ID
+- `POST /api/agenda/events` - Criar evento (com detecção de conflito)
+- `PUT /api/agenda/events/:id` - Atualizar evento
+- `DELETE /api/agenda/events/:id` - Soft delete
+- `POST /api/agenda/events/:id/cancel` - Cancelar evento
+- `POST /api/agenda/events/:id/complete` - Marcar como completado
+- `POST /api/agenda/events/:id/attendees` - Adicionar participante
+- `DELETE /api/agenda/events/:id/attendees/:userId` - Remover participante
 
 ### Whitelabel Module Refactoring (Branch: `008-refactor-whitelabel`) ✅
 
@@ -160,25 +192,24 @@ c226140 :memo: feat: add implementation plan for god mode debug (phase 0 & 1 com
 ### [DONE] ✅
 1. [DONE] Refatorar módulo Leads (001) - 5 endpoints, 92.93% coverage
 2. [DONE] Refatorar módulo Whitelabel (008) - 2 endpoints, 42 testes, 100% coverage
+3. [DONE] Refatorar módulo Agenda (009) - 9 endpoints, 23 testes
 
 ### [IN PROGRESS] 🔄
-- Branch `008-refactor-whitelabel`: Módulo Whitelabel completo, pronto para merge
+- Branch `010-refactor-budget`: Pronto para iniciar refatoração do módulo Budget
 
 ### [TODO] 📋
-1. [TODO] Refatorar módulo Agenda (004) - Spec criada
-2. [TODO] Refatorar módulo Budget (005) - Spec criada
-3. [TODO] Refatorar módulo Billing (006) - Spec criada
-4. [TODO] Refatorar módulo Dashboard (007) - Spec criada
-5. [TODO] Merge branch `008-refactor-whitelabel` to `main`
-6. [TODO] Push to remote repository
+1. [TODO] Refatorar módulo Budget (010) - Spec criada
+2. [TODO] Refatorar módulo Billing (006) - Spec criada
+3. [TODO] Refatorar módulo Dashboard (007) - Spec criada
+4. [TODO] Push to remote repository
 
 ### Success Metrics - Refactoring Progress
 | Metric | Leads | Whitelabel | Agenda | Budget | Billing | Dashboard | Total |
 |--------|-------|------------|--------|--------|---------|-----------|-------|
-| Endpoints | 5 | 2 | 0 | 0 | 0 | 0 | 7/40+ |
-| Tests | 30+ | 42 | 0 | 0 | 0 | 0 | 72+ |
-| Coverage | 92.93% | 100% | - | - | - | - | ~96% |
-| Status | ✅ | ✅ | 📝 | 📝 | 📝 | 📝 | 2/6 |
+| Endpoints | 5 | 2 | 9 | 0 | 0 | 0 | 16/40+ |
+| Tests | 30+ | 42 | 23 | 0 | 0 | 0 | 95+ |
+| Coverage | 92.93% | 100% | ~93% | - | - | - | ~95% |
+| Status | ✅ | ✅ | ✅ | 📝 | 📝 | 📝 | 3/6 |
 
 ### Known Issues Resolved
 - **Critical (6)**: All resolved
@@ -197,7 +228,7 @@ c226140 :memo: feat: add implementation plan for god mode debug (phase 0 & 1 com
 ---
 
 ## Summary Metadata
-**Update time**: 2026-03-01T02:07:00.000Z
-**Current Branch**: 008-refactor-whitelabel
-**Last Commit**: 6063888 ✨ feat: implement hexagonal architecture for Whitelabel module
-**Next Module**: Agenda (004-refactor-agenda) 
+**Update time**: 2026-03-01T02:20:00.000Z
+**Current Branch**: 010-refactor-budget
+**Last Commit**: 8a531eb ✨ feat: implement hexagonal architecture for Agenda module
+**Next Module**: Budget (010-refactor-budget) 
