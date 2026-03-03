@@ -160,10 +160,39 @@ export const billing = pgTable('billing', {
     status: billingStatusEnum('status').default('PENDING'),
     invoiceNumber: text('invoice_number'),
     subscriptionPlan: text('subscription_plan'), // BASIC, PRO, ENTERPRISE
+    description: text('description'),
+    paidAt: timestamp('paid_at'),
     createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+    deletedAt: timestamp('deleted_at'),
 }, (table) => ({
     idx_billing_status: index('idx_billing_status').on(table.status),
     idx_billing_due_date: index('idx_billing_due_date').on(table.dueDate),
+    idx_billing_invoice_number: index('idx_billing_invoice_number').on(table.invoiceNumber),
+}));
+
+// Payments
+export const paymentStatusEnum = pgEnum('payment_status', ['PENDING', 'APPROVED', 'REJECTED', 'REFUNDED', 'CHARGEBACK']);
+export const paymentMethodEnum = pgEnum('payment_method', ['CREDIT_CARD', 'DEBIT_CARD', 'PIX', 'BOLETO', 'BANK_TRANSFER', 'PAYPAL', 'STRIPE']);
+
+export const payments = pgTable('payments', {
+    id: serial('id').primaryKey(),
+    invoiceId: integer('invoice_id').notNull(),
+    amount: doublePrecision('amount').notNull(),
+    method: paymentMethodEnum('method').notNull(),
+    status: paymentStatusEnum('status').default('PENDING'),
+    transactionId: text('transaction_id'),
+    paidAt: timestamp('paid_at'),
+    refundedAt: timestamp('refunded_at'),
+    refundReason: text('refund_reason'),
+    metadata: jsonb('metadata'),
+    createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+    deletedAt: timestamp('deleted_at'),
+}, (table) => ({
+    idx_payments_invoice_id: index('idx_payments_invoice_id').on(table.invoiceId),
+    idx_payments_status: index('idx_payments_status').on(table.status),
+    idx_payments_transaction_id: index('idx_payments_transaction_id').on(table.transactionId),
 }));
 
 // Metrics (Analytics)
@@ -250,3 +279,15 @@ export const productionTasksRelations = relations(productionTasks, ({ one }) => 
 
 // WhitelabelConfig (no relations needed - singleton config table)
 export const whitelabelConfigRelations = relations(whitelabelConfig, () => ({}));
+
+// Billing ↔ Payments (one-to-many)
+export const billingRelations = relations(billing, ({ many }) => ({
+    payments: many(payments),
+}));
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+    invoice: one(billing, {
+        fields: [payments.invoiceId],
+        references: [billing.id],
+    }),
+}));
