@@ -133,6 +133,8 @@ export const budget = pgTable('budget', {
     status: budgetStatusEnum('status').default('PENDING'),
     connectedEpisodeId: integer('connected_episode_id').references(() => episodes.id),
     createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
+    deletedAt: timestamp('deleted_at'),
 }, (table) => ({
     idx_budget_type: index('idx_budget_type').on(table.type),
     idx_budget_category: index('idx_budget_category').on(table.category),
@@ -146,6 +148,7 @@ export const budgetTemplates = pgTable('budget_templates', {
     name: text('name').notNull(), // e.g., "Standard Episode Costs"
     items: jsonb('items').$type<{ concept: string; amount: number; type: 'INCOME' | 'EXPENSE'; category: string }[]>(),
     createdAt: timestamp('created_at').defaultNow(),
+    updatedAt: timestamp('updated_at').defaultNow(),
 });
 
 // Billing (Invoices/Receivables)

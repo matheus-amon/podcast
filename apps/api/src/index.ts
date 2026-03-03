@@ -5,7 +5,7 @@ import { loggerMiddleware } from "./middleware/logger.middleware";
 import { createLeadsModule } from "./modules/leads/leads.module";
 import { createWhitelabelModule } from "./modules/whitelabel/whitelabel.module";
 import { createAgendaModule } from "./modules/agenda/agenda.module";
-import { budgetRoutes } from "./modules/budget/budget.controller";
+import { createBudgetModule } from "./modules/budget/budget.module";
 import { billingRoutes } from "./modules/billing/billing.controller";
 import { dashboardRoutes } from "./modules/dashboard/dashboard.controller";
 
@@ -13,6 +13,7 @@ import { dashboardRoutes } from "./modules/dashboard/dashboard.controller";
 const leadsModule = createLeadsModule();
 const whitelabelModule = createWhitelabelModule();
 const agendaModule = createAgendaModule();
+const budgetModule = createBudgetModule();
 
 const app = new Elysia()
     .use(swagger())
@@ -30,7 +31,7 @@ const app = new Elysia()
             .use(leadsModule.routes)      // New hexagonal module
             .use(whitelabelModule.routes) // New hexagonal module
             .use(agendaModule.routes)     // New hexagonal module
-            .use(budgetRoutes)
+            .use(budgetModule.routes)     // New hexagonal module
             .use(billingRoutes)
             .use(dashboardRoutes)
     )
