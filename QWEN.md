@@ -365,3 +365,10 @@ NEXT_PUBLIC_APP_NAME=Podcast SaaS
 ---
 
 **Projeto Podcast SaaS POC - 100% Completo** 🎉
+
+## Active Technologies
+- TypeScript 5.x (Bun 1.3.6 runtime) (001-user-auth)
+- PostgreSQL 15 (via Drizzle ORM) - tabela `users` (001-user-auth)
+
+## Recent Changes
+- 001-user-auth: Added TypeScript 5.x (Bun 1.3.6 runtime)
