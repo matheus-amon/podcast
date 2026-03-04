@@ -347,19 +347,19 @@ Implementar frontend do Podcast SaaS módulo por módulo, garantindo qualidade e
 ### Status Atual
 
 ```
-Loop 1: Setup + Design System    → [ ] Spec [ ] Implement [ ] Validate
-Loop 2: Dashboard                → [ ] Spec [ ] Implement [ ] Validate
-Loop 3: Leads + Kanban           → [ ] Spec [ ] Implement [ ] Validate
-Loop 4: Agenda + Calendar        → [ ] Spec [ ] Implement [ ] Validate
-Loop 5: Episodes                 → [ ] Spec [ ] Implement [ ] Validate
-Loop 6: Budget                   → [ ] Spec [ ] Implement [ ] Validate
-Loop 7: Billing                  → [ ] Spec [ ] Implement [ ] Validate
-Loop 8: Settings                 → [ ] Spec [ ] Implement [ ] Validate
+✅ Loop 1: Setup + Design System    → [✅] Spec [✅] Implement [✅] Validate
+✅ Loop 2: Dashboard                → [✅] Spec [✅] Implement [✅] Validate
+⏳ Loop 3: Leads + Kanban           → [✅] Spec [ ] Implement [ ] Validate
+⏳ Loop 4: Agenda + Calendar        → [ ] Spec [ ] Implement [ ] Validate
+⏳ Loop 5: Episodes                 → [ ] Spec [ ] Implement [ ] Validate
+⏳ Loop 6: Budget                   → [ ] Spec [ ] Implement [ ] Validate
+⏳ Loop 7: Billing                  → [ ] Spec [ ] Implement [ ] Validate
+⏳ Loop 8: Settings                 → [ ] Spec [ ] Implement [ ] Validate
 ```
 
 ### Próxima Ação
 
-**Iniciar Loop 1**: Setup + Design System
+**Próximo**: Loop 3 - Leads + Kanban
 
 ---
 
