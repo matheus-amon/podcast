@@ -2,7 +2,47 @@
 
 **Data**: 2026-03-04
 **Branch**: 001-user-auth
-**Status**: Phase 6 COMPLETE ✅
+**Status**: Phase 6 COMPLETE ✅ - Ready for Phase 7
+
+---
+
+## 🛑 Session Handoff - Next Steps
+
+**Parar aqui**: Phase 6 completa, pronta para iniciar Phase 7 na próxima sessão.
+
+**Onde continuar**: Iniciar **Phase 7: User Story 5 - Session Persistence**
+
+### Checklist para Próxima Sessão
+
+**Phase 7 - Session Persistence (P3)** - 4 tasks pendentes:
+
+```
+T068 [P] [US5] Create Token Refresh test 
+  → apps/api/src/application/user/use-cases/refresh-token.use-case.test.ts
+
+T069 [P] [US5] Create E2E session persistence test
+  → apps/api/tests/e2e/auth.e2e.test.ts (extends T060)
+
+T070 [US5] Implement Refresh Token Use Case
+  → apps/api/src/application/user/use-cases/refresh-token.use-case.ts
+
+T071 [US5] Implement POST /auth/refresh endpoint
+  → apps/api/src/infrastructure/http/adapters/auth.controller.ts
+
+T072 [US5] Add OpenAPI documentation for /auth/refresh
+  → In auth.controller.ts
+
+T073 [US5] Implement token refresh interceptor
+  → apps/web/src/lib/auth/interceptors.ts
+
+T074 [US5] Add session persistence logic in use-auth hook
+  → apps/web/src/hooks/use-auth.ts (update existing)
+
+T075 [US5] Implement automatic token refresh on 401 responses
+  → apps/web/src/lib/auth/interceptors.ts
+```
+
+**Referência**: Ver `specs/001-user-auth/tasks.md` Phase 7 para detalhes completos.
 
 ---
 
@@ -129,3 +169,59 @@ auth guards  → Utility functions for auth checks
 - Bearer token in Authorization header
 - 401 response triggers redirect to /login
 - Token validation on every protected API call
+
+---
+
+## 📋 Session Context
+
+### O que foi feito nesta sessão (2026-03-04)
+
+**Phase 5 - Logout (Completo):**
+- ✅ PostgresRefreshTokenRepository adapter
+- ✅ LogoutController integration
+- ✅ LogoutButton no TopBar
+- ✅ Token cleanup (localStorage + redirect)
+
+**Phase 6 - Protected Routes (Completo):**
+- ✅ Auth Guard middleware com JWT validation
+- ✅ GET /auth/me endpoint protegido
+- ✅ useAuth hook (frontend)
+- ✅ withAuth HOC para proteger rotas
+- ✅ Dashboard protegido com redirect automático
+- ✅ 6 testes novos (4 backend + 2 frontend)
+
+**Commits:**
+```
+17fbbbf 📄 docs: update Phase 6 completion status
+ee1d624 ✨ feat: implement Phase 6 - Protected Routes (Frontend)
+71fc470 ✨ feat: implement Phase 6 - Protected Routes (Backend)
+ec0b81b ✨ feat: complete Logout feature (Phase 5 100%)
+```
+
+### Comandos para validar antes de continuar
+
+```bash
+# Backend tests
+cd apps/api && bun test tests/unit/middleware/auth-guard.test.ts
+
+# Frontend tests
+cd apps/web && bun test:run
+
+# Start backend server
+cd apps/api && bun run src/index.ts
+
+# Start frontend dev server
+cd apps/web && bun dev
+```
+
+### Pontos de Atenção
+
+1. **Submodule apps/web**: Foi removido do cache git e tratado como diretório normal
+2. **Token Expiration**: JWT expira em 15min (configurado em `apps/api/src/lib/jwt.ts`)
+3. **Refresh Token**: Entity e repository já existem, falta implementar o use case
+4. **Login Endpoint**: Ainda não implementado (Phase 4 incompleta - 56%)
+   - Se necessário para testar refresh, implementar T039-T048 primeiro
+
+---
+
+**Próxima sessão**: Iniciar Phase 7 (Session Persistence) ou completar Phase 4 (Login) se necessário para testes.
