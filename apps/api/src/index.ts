@@ -8,6 +8,7 @@ import { createAgendaModule } from "./modules/agenda/agenda.module";
 import { createBudgetModule } from "./modules/budget/budget.module";
 import { createBillingModule } from "./modules/billing/billing.module";
 import { createReportModule } from "./modules/report/report.module";
+import { createAuthModule } from "./modules/auth/auth.module";
 import { dashboardRoutes } from "./modules/dashboard/dashboard.controller";
 
 // Create modules with hexagonal architecture
@@ -17,6 +18,7 @@ const agendaModule = createAgendaModule();
 const budgetModule = createBudgetModule();
 const billingModule = createBillingModule();
 const reportModule = createReportModule();
+const authModule = createAuthModule();
 
 const app = new Elysia()
     .use(swagger())
@@ -37,6 +39,7 @@ const app = new Elysia()
             .use(budgetModule.routes)     // New hexagonal module
             .use(billingModule.routes)    // New hexagonal module
             .use(reportModule.routes)     // New hexagonal module
+            .use(authModule.routes)       // Auth module (new)
             .use(dashboardRoutes)         // Legacy - to be removed
     )
     .listen(3001);
