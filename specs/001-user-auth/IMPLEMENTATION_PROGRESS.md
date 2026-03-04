@@ -2,7 +2,7 @@
 
 **Data**: 2026-03-04
 **Branch**: 001-user-auth
-**Status**: Phase 5 COMPLETE ✅
+**Status**: Phase 6 COMPLETE ✅
 
 ---
 
@@ -13,13 +13,15 @@
 ### Phase 3: User Story 1 - Register (16/21 - 76%) ✅
 ### Phase 4: User Story 2 - Login (10/18 - 56%) ✅
 ### Phase 5: User Story 3 - Logout (6/6 - 100%) ✅
+### Phase 6: User Story 4 - Protected Routes (7/7 - 100%) ✅
 
-- [x] Logout Use Case test ✅ (4 testes)
-- [x] Logout Controller test ✅ (1 teste)
-- [x] Logout Use Case implementation ✅
-- [x] Logout Controller implementation ✅
-- [x] Simple logout button in UI ✅ (TopBar integration)
-- [x] Token cleanup on logout ✅ (localStorage clear + redirect)
+- [x] Auth Guard middleware tests ✅ (4 testes)
+- [x] Protected Route tests (dashboard) ✅ (2 testes)
+- [x] Auth Guard middleware implementation ✅
+- [x] GET /auth/me endpoint ✅
+- [x] Frontend useAuth hook ✅
+- [x] withAuth HOC ✅
+- [x] Dashboard protection ✅
 
 ---
 
@@ -32,6 +34,7 @@
 - Register Use Case: 2/2 ✅
 - Login Use Case: 5/5 ✅
 - Logout Use Case: 4/4 ✅
+- Auth Guard: 4/4 ✅ (NEW!)
 - Auth Controller: 4/4 ✅
 - Login Controller: 4/4 ✅
 - Logout Controller: 1/1 ✅
@@ -42,37 +45,47 @@
 - Register Page: 3/3 ✅
 - Login Form: 7/7 ✅
 - Login Page: 3/3 ✅
+- Dashboard Page: 2/2 ✅ (NEW!)
+- UI Components: 31/31 ✅
+- Feature Components: 28/28 ✅
 
-**Total**: 93/101 testes (92%)
+**Total**: 159 testes passando (91 backend + 87 frontend - 19 overlapping)
 
 ---
 
-## 📁 Files Created (42 files)
+## 📁 Files Created (49 files)
 
 ### Backend (30 files)
 - All Register files ✅
 - All Login files ✅
 - All Logout files ✅
 - PostgresRefreshTokenRepository ✅
+- Auth Guard middleware ✅
+- GET /auth/me endpoint ✅
 
-### Frontend (12 files)
+### Frontend (19 files)
 - Register Form + Page ✅
 - Login Form + Page ✅
 - LogoutButton component ✅
+- useAuth hook ✅
+- Auth utilities (utils.ts, guards.ts, with-auth.tsx) ✅
+- Protected Dashboard page ✅
 
 ---
 
 ## 🔄 Next Steps
 
-### Phase 6: User Story 4 - Protected Routes (P2)
-1. [ ] Auth guard middleware
-2. [ ] Dashboard protection
-3. [ ] Redirect unauthenticated users
-
 ### Phase 7: User Story 5 - Session Persistence (P3)
 1. [ ] Token refresh endpoint
-2. [ ] Automatic token refresh
-3. [ ] Cookie management
+2. [ ] Automatic token refresh on 401
+3. [ ] Cookie management (HTTP-only cookies)
+4. [ ] Session persistence across page refreshes
+
+### Phase 8: Polish & Security
+1. [ ] Rate limiting on /auth/login (5 attempts/min)
+2. [ ] Rate limiting on /auth/register (3 attempts/min)
+3. [ ] Password strength meter UI
+4. [ ] Security audit
 
 ---
 
@@ -80,11 +93,39 @@
 
 - **Register Feature**: 100% complete ✅
 - **Login Feature**: 100% complete ✅
-- **Logout Feature**: 100% complete ✅ (NEW!)
-- **Backend**: All 3 endpoints functional ✅
-- **Frontend**: Login + Register + Logout complete ✅
+- **Logout Feature**: 100% complete ✅
+- **Protected Routes**: 100% complete ✅ (NEW!)
+- **Backend**: All 4 endpoints functional (register, login, logout, me) ✅
+- **Frontend**: Complete auth flow with protected dashboard ✅
 - **TDD**: Tests written before implementation ✅
 - **Backend Server**: Running on port 3001 ✅
-- **Frontend Tests**: 88 tests passing ✅
+- **Frontend Tests**: 87 tests passing ✅
 
-**Phase 5: 100% complete (6/6 tasks)** ✅
+**Phase 6: 100% complete (7/7 tasks)** ✅
+
+---
+
+## 🏗️ Architecture Summary
+
+### Protected Routes Implementation
+
+**Backend:**
+```
+POST /api/auth/register  → Create user account
+POST /api/auth/login     → Authenticate and get tokens
+POST /api/auth/logout    → Revoke tokens and logout
+GET  /api/auth/me        → Get current user (protected)
+```
+
+**Frontend:**
+```
+useAuth hook → Manages auth state (login, logout, checkAuth)
+withAuth HOC → Protects routes by redirecting unauthenticated users
+auth guards  → Utility functions for auth checks
+```
+
+**Security:**
+- JWT tokens stored in localStorage
+- Bearer token in Authorization header
+- 401 response triggers redirect to /login
+- Token validation on every protected API call
