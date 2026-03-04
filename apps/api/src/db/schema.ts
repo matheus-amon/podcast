@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, doublePrecision, date, boolean, integer, pgEnum, jsonb, index } from 'drizzle-orm/pg-core';
+import { pgTable, serial, text, timestamp, doublePrecision, date, boolean, integer, pgEnum, jsonb, index, uuid, varchar } from 'drizzle-orm/pg-core';
 import { relations } from 'drizzle-orm';
 
 // Enums
@@ -193,6 +193,42 @@ export const payments = pgTable('payments', {
     idx_payments_invoice_id: index('idx_payments_invoice_id').on(table.invoiceId),
     idx_payments_status: index('idx_payments_status').on(table.status),
     idx_payments_transaction_id: index('idx_payments_transaction_id').on(table.transactionId),
+}));
+
+// Users (Authentication)
+export const users = pgTable('users', {
+    id: uuid('id').primaryKey(),
+    email: varchar('email', { length: 255 }).notNull().unique(),
+    passwordHash: varchar('password_hash', { length: 255 }).notNull(),
+    name: varchar('name', { length: 100 }).notNull(),
+    avatarUrl: varchar('avatar_url', { length: 500 }),
+    isActive: boolean('is_active').default(true).notNull(),
+    emailVerifiedAt: timestamp('email_verified_at'),
+    lastLoginAt: timestamp('last_login_at'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    deletedAt: timestamp('deleted_at'),
+}, (table) => ({
+    idxUsersEmail: index('idx_users_email').on(table.email),
+    idxUsersActive: index('idx_users_active').on(table.isActive),
+    idxUsersDeleted: index('idx_users_deleted').on(table.deletedAt),
+}));
+
+// Refresh Tokens (Authentication)
+export const refreshTokens = pgTable('refresh_tokens', {
+    id: uuid('id').primaryKey(),
+    userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+    token: varchar('token', { length: 255 }).notNull().unique(),
+    expiresAt: timestamp('expires_at').notNull(),
+    usedAt: timestamp('used_at'),
+    revokedAt: timestamp('revoked_at'),
+    ipAddress: varchar('ip_address', { length: 45 }),
+    userAgent: text('user_agent'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => ({
+    idxRefreshTokensUser: index('idx_refresh_tokens_user_id').on(table.userId),
+    idxRefreshTokensToken: index('idx_refresh_tokens_token').on(table.token),
+    idxRefreshTokensExpires: index('idx_refresh_tokens_expires').on(table.expiresAt),
 }));
 
 // Metrics (Analytics)
