@@ -1,29 +1,46 @@
 /**
  * Auth Guard Tests
- * 
+ *
  * Test authentication guard middleware
  */
 
 import { describe, it, expect } from 'bun:test';
+import { verifyToken } from '../../../src/lib/jwt';
+import { signAccessToken } from '../../../src/lib/jwt';
 
 describe('AuthGuard', () => {
-  it('should allow access with valid token', () => {
-    // Test placeholder - integration test with server
-    expect(true).toBe(true);
+  const mockUserId = '123e4567-e89b-12d3-a456-426614174000';
+  const mockEmail = 'test@example.com';
+
+  describe('verifyToken', () => {
+    it('should verify valid token', () => {
+      const token = signAccessToken({ userId: mockUserId, email: mockEmail });
+      const payload = verifyToken(token);
+
+      expect(payload).toBeTruthy();
+      expect(payload?.userId).toBe(mockUserId);
+      expect(payload?.email).toBe(mockEmail);
+      expect(payload?.type).toBe('access');
+    });
+
+    it('should return null for invalid token', () => {
+      const payload = verifyToken('invalid-token');
+      expect(payload).toBeNull();
+    });
+
+    it('should return null for tampered token', () => {
+      const token = signAccessToken({ userId: mockUserId, email: mockEmail });
+      const payload = verifyToken(token + 'tampered');
+      expect(payload).toBeNull();
+    });
   });
 
-  it('should reject access without token', () => {
-    // Test placeholder
-    expect(true).toBe(true);
-  });
-
-  it('should reject access with expired token', () => {
-    // Test placeholder
-    expect(true).toBe(true);
-  });
-
-  it('should reject access with invalid token', () => {
-    // Test placeholder
-    expect(true).toBe(true);
+  describe('Token Validation', () => {
+    it('should create valid access token', () => {
+      const token = signAccessToken({ userId: mockUserId, email: mockEmail });
+      expect(token).toBeDefined();
+      expect(typeof token).toBe('string');
+      expect(token.split('.')).toHaveLength(3); // JWT has 3 parts
+    });
   });
 });

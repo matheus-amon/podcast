@@ -1,10 +1,11 @@
 /**
  * Auth Controller
- * 
+ *
  * HTTP controller for authentication endpoints
  */
 
 import { Elysia, t } from 'elysia';
+import { authGuardMiddleware } from '../../../middleware/auth-guard';
 import type { RegisterUserUseCase } from '../../application/user/use-cases/register-user.use-case';
 
 export class AuthController {
@@ -76,6 +77,61 @@ export class AuthController {
               },
               409: {
                 description: 'Email already registered',
+              },
+            },
+          },
+        }
+      )
+      // GET /auth/me - Protected route
+      .use(authGuardMiddleware())
+      .get(
+        '/me',
+        async ({ user, set }) => {
+          if (!user) {
+            set.status = 401;
+            return {
+              error: {
+                code: 'UNAUTHORIZED',
+                message: 'User not authenticated',
+              },
+            };
+          }
+
+          return {
+            user: {
+              userId: user.userId,
+              email: user.email,
+            },
+          };
+        },
+        {
+          detail: {
+            summary: 'Get current user',
+            description: 'Retrieve authenticated user information',
+            tags: ['Authentication'],
+            security: [{ bearerAuth: [] }],
+            responses: {
+              200: {
+                description: 'User information retrieved successfully',
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        user: {
+                          type: 'object',
+                          properties: {
+                            userId: { type: 'string', format: 'uuid' },
+                            email: { type: 'string', format: 'email' },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              401: {
+                description: 'Unauthorized - Invalid or missing token',
               },
             },
           },
