@@ -5,11 +5,16 @@
 - Design System: Cores Slate+Azul (#3B82F6 primary), Tipografia Inter, Espaçamento confortável (p-8 pages, py-6 px-6 cards), Bordas rounded-md (~6px), Sombras subtle, Breakpoints: sm(640), md(768), lg(1024), xl(1280), 2xl(1536)
 - Módulos frontend em ordem: 1.Dashboard, 2.Leads+Kanban, 3.Agenda+Calendar, 4.Episodes, 5.Budget, 6.Billing, 7.Settings - Usar método Ralph Loop (criar spec → implementar → validar → próximo)
 - Documentação do frontend criada em: /docs/design-system/design-system.md (completo), /docs/architecture/ (ADRs 001-005), /docs/prds/ (PRDs por módulo), /docs/implementation-plan.md (Ralph Loop). PRDs detalhados: Dashboard, Leads, Agenda, Episodes, Budget, Billing, Settings
+- Testes: Vitest + React Testing Library + MSW configurados, 65 testes passando (100% pass rate), coverage threshold 95% target, scripts: test, test:run, test:ui, test:coverage
+- Frontend: 8/8 loops completos (100%), 7 páginas, 31+ componentes, build passando, TypeScript sem erros
 
 ## Active Technologies
 - TypeScript 5.x, Bun 1.3.6 + ElysiaJS 1.4, Drizzle ORM 0.45, Next.js 16, React 19 (001-fix-god-debug)
 - PostgreSQL 15 (via docker-compose) (001-fix-god-debug)
 - TypeScript 5.x + Bun 1.3.6, ElysiaJS 1.4, Drizzle ORM 0.45 (001-hexagonal-backend-refactor)
+- Vitest, React Testing Library, MSW (testing)
 
 ## Recent Changes
 - 001-fix-god-debug: Added TypeScript 5.x, Bun 1.3.6 + ElysiaJS 1.4, Drizzle ORM 0.45, Next.js 16, React 19
+- Frontend: 8 loops implementados (Dashboard, Leads, Agenda, Episodes, Budget, Billing, Settings)
+- Testes: 65 testes unitários passando (100% pass rate)
