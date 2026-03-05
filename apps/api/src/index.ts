@@ -1,4 +1,4 @@
-import { Elysia } from "elysia";
+import { Elysia, cors } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { errorMiddleware } from "./middleware/error.middleware";
 import { loggerMiddleware } from "./middleware/logger.middleware";
@@ -21,6 +21,12 @@ const reportModule = createReportModule();
 const authModule = createAuthModule();
 
 const app = new Elysia()
+    .use(cors({
+        origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+        credentials: true,
+        allowedHeaders: ['Content-Type', 'Authorization'],
+        methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    }))
     .use(swagger())
     .use(errorMiddleware)      // Register BEFORE routes
     .use(loggerMiddleware)     // Register BEFORE routes
