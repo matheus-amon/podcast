@@ -1,10 +1,11 @@
 /**
  * Login Controller
- * 
+ *
  * HTTP controller for login endpoint
  */
 
 import { Elysia, t } from 'elysia';
+import { rateLimiter } from '../../../middleware/rate-limit';
 import type { LoginUserUseCase } from '../../application/user/use-cases/login-user.use-case';
 
 export class LoginController {
@@ -19,7 +20,8 @@ export class LoginController {
    */
   private createRoutes(): Elysia {
     return new Elysia({ prefix: '/auth' })
-      // POST /auth/login
+      // POST /auth/login (Rate limit: 5 attempts per minute)
+      .use(rateLimiter(5))
       .post(
         '/login',
         async ({ body }) => {
@@ -55,6 +57,9 @@ export class LoginController {
               },
               403: {
                 description: 'Account deactivated',
+              },
+              429: {
+                description: 'Too many requests - Rate limit exceeded',
               },
             },
           },

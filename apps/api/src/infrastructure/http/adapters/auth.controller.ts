@@ -6,6 +6,7 @@
 
 import { Elysia, t } from 'elysia';
 import { authGuardMiddleware } from '../../../middleware/auth-guard';
+import { rateLimiter } from '../../../middleware/rate-limit';
 import type { RegisterUserUseCase } from '../../application/user/use-cases/register-user.use-case';
 import type { RefreshTokenUseCase } from '../../application/user/use-cases/refresh-token.use-case';
 
@@ -24,7 +25,8 @@ export class AuthController {
    */
   private createRoutes(): Elysia {
     return new Elysia({ prefix: '/auth' })
-      // POST /auth/register
+      // POST /auth/register (Rate limit: 3 attempts per minute)
+      .use(rateLimiter(3))
       .post(
         '/register',
         async ({ body }) => {
