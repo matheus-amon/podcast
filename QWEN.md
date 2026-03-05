@@ -8,9 +8,10 @@
 
 ## 📋 Visão Geral do Projeto
 
-Podcast SaaS POC é uma plataforma completa para gerenciamento de podcasts, com backend em arquitetura hexagonal e frontend moderno com Design System consistente.
+Podcast SaaS é uma plataforma completa para gerenciamento de podcasts, com backend em arquitetura hexagonal e frontend moderno com Design System consistente.
 
 ### Objetivo
+
 Refatorar todos os 6 módulos do backend para arquitetura hexagonal com TDD (95%+ coverage) e construir frontend do zero com Design System documentado.
 
 ---
@@ -18,32 +19,34 @@ Refatorar todos os 6 módulos do backend para arquitetura hexagonal com TDD (95%
 ## 🛠️ Tech Stack
 
 ### Backend
-| Tecnologia | Versão | Propósito |
-|------------|--------|-----------|
-| Bun | 1.3.6 | Runtime JavaScript |
-| ElysiaJS | 1.4 | Framework HTTP |
-| Drizzle ORM | 0.45 | ORM TypeScript |
-| PostgreSQL | 15 | Banco de dados |
-| TypeScript | 5.x | Type safety |
+
+| Tecnologia  | Versão | Propósito          |
+| ----------- | ------ | ------------------ |
+| Bun         | 1.3.6  | Runtime JavaScript |
+| ElysiaJS    | 1.4    | Framework HTTP     |
+| Drizzle ORM | 0.45   | ORM TypeScript     |
+| PostgreSQL  | 15     | Banco de dados     |
+| TypeScript  | 5.x    | Type safety        |
 
 ### Frontend
-| Tecnologia | Versão | Propósito |
-|------------|--------|-----------|
-| Next.js | 16.1.6 | Framework React |
-| React | 19.2.3 | Biblioteca UI |
-| TypeScript | 5.x | Type safety |
-| TailwindCSS | 4.x | Styling |
-| Shadcn/UI | latest | Componentes base |
-| TanStack Query | 5.x | Data fetching |
-| Zustand | 5.x | State management |
-| React Hook Form | 7.x | Forms |
-| Zod | 4.x | Validação |
-| TanStack Table | 8.x | Tabelas |
-| React Big Calendar | 1.x | Calendário |
-| Recharts | 3.x | Gráficos |
-| Vitest | 4.x | Testes |
-| React Testing Library | 16.x | Testes de componentes |
-| MSW | 2.x | Mock de API |
+
+| Tecnologia            | Versão | Propósito             |
+| --------------------- | ------ | --------------------- |
+| Next.js               | 16.1.6 | Framework React       |
+| React                 | 19.2.3 | Biblioteca UI         |
+| TypeScript            | 5.x    | Type safety           |
+| TailwindCSS           | 4.x    | Styling               |
+| Shadcn/UI             | latest | Componentes base      |
+| TanStack Query        | 5.x    | Data fetching         |
+| Zustand               | 5.x    | State management      |
+| React Hook Form       | 7.x    | Forms                 |
+| Zod                   | 4.x    | Validação             |
+| TanStack Table        | 8.x    | Tabelas               |
+| React Big Calendar    | 1.x    | Calendário            |
+| Recharts              | 3.x    | Gráficos              |
+| Vitest                | 4.x    | Testes                |
+| React Testing Library | 16.x   | Testes de componentes |
+| MSW                   | 2.x    | Mock de API           |
 
 ---
 
@@ -52,6 +55,7 @@ Refatorar todos os 6 módulos do backend para arquitetura hexagonal com TDD (95%
 ### Backend - Arquitetura Hexagonal
 
 Cada módulo segue a estrutura:
+
 ```
 src/
 ├── domain/
@@ -100,29 +104,29 @@ src/
 
 ### Backend (6/6 módulos)
 
-| Módulo | Endpoints | Testes | Coverage | Status |
-|--------|-----------|--------|----------|--------|
-| **Leads** | 5 | 30+ | 92.93% | ✅ |
-| **Whitelabel** | 2 | 42 | 100% | ✅ |
-| **Agenda** | 9 | 23 | ~93% | ✅ |
-| **Budget** | 9 | 81 | 100% | ✅ |
-| **Billing** | 11 | 67 | 90%+ | ✅ |
-| **Report** | 6 | 6 | 90%+ | ✅ |
+| Módulo         | Endpoints | Testes | Coverage | Status |
+| -------------- | --------- | ------ | -------- | ------ |
+| **Leads**      | 5         | 30+    | 92.93%   | ✅     |
+| **Whitelabel** | 2         | 42     | 100%     | ✅     |
+| **Agenda**     | 9         | 23     | ~93%     | ✅     |
+| **Budget**     | 9         | 81     | 100%     | ✅     |
+| **Billing**    | 11        | 67     | 90%+     | ✅     |
+| **Report**     | 6         | 6      | 90%+     | ✅     |
 
 **Total Backend**: 42 endpoints, 250+ testes, 90%+ coverage
 
 ### Frontend (8/8 loops)
 
-| Loop | Módulo | Páginas | Componentes | Testes | Status |
-|------|--------|---------|-------------|--------|--------|
-| 1 | Setup + Design System | - | Base | - | ✅ |
-| 2 | Dashboard | 1 | 6 | 16 | ✅ |
-| 3 | Leads + Kanban | 1 | 5 | - | ✅ |
-| 4 | Agenda + Calendar | 1 | 3 | - | ✅ |
-| 5 | Episodes | 1 | 4 | 5 | ✅ |
-| 6 | Budget | 1 | 4 | 6 | ✅ |
-| 7 | Billing | 1 | 4 | 8 | ✅ |
-| 8 | Settings | 1 | 5 | - | ✅ |
+| Loop | Módulo                | Páginas | Componentes | Testes | Status |
+| ---- | --------------------- | ------- | ----------- | ------ | ------ |
+| 1    | Setup + Design System | -       | Base        | -      | ✅     |
+| 2    | Dashboard             | 1       | 6           | 16     | ✅     |
+| 3    | Leads + Kanban        | 1       | 5           | -      | ✅     |
+| 4    | Agenda + Calendar     | 1       | 3           | -      | ✅     |
+| 5    | Episodes              | 1       | 4           | 5      | ✅     |
+| 6    | Budget                | 1       | 4           | 6      | ✅     |
+| 7    | Billing               | 1       | 4           | 8      | ✅     |
+| 8    | Settings              | 1       | 5           | -      | ✅     |
 
 **Total Frontend**: 7 páginas, 31+ componentes, 65 testes
 
@@ -131,12 +135,14 @@ src/
 ## 🧪 Testes
 
 ### Backend
+
 - **Framework**: Bun test
 - **Total**: 250+ testes unitários
 - **Coverage**: 90%+ em todos os módulos
 - **Foco**: Entities, Use Cases, Value Objects
 
 ### Frontend
+
 - **Framework**: Vitest + React Testing Library
 - **Total**: 65 testes passando (100% pass rate)
 - **Coverage Target**: 95%
@@ -161,6 +167,7 @@ bun test:coverage     # With coverage
 ## 📐 Design System
 
 ### Cores
+
 - **Primary**: Azul (#3B82F6 / oklch(0.55 0.22 260.65))
 - **Background**: Slate-50 (#F8FAFC)
 - **Foreground**: Slate-900
@@ -170,19 +177,23 @@ bun test:coverage     # With coverage
 - **Destructive**: Vermelho (#EF4444)
 
 ### Tipografia
+
 - **Fonte**: Inter (Google Fonts)
 - **Escala**: text-xs, text-sm, text-base, text-lg, text-xl, text-2xl, text-3xl
 
 ### Espaçamento
+
 - **Page padding**: p-8 (32px)
 - **Card padding**: py-6 px-6 (24px 16px)
 - **Gap**: gap-2, gap-3, gap-4, gap-6
 
 ### Bordas
+
 - **Radius**: rounded-md (~6px)
 - **Shadows**: shadow-sm (subtle)
 
 ### Breakpoints
+
 - sm: 640px
 - md: 768px
 - lg: 1024px
@@ -194,6 +205,7 @@ bun test:coverage     # With coverage
 ## 🔄 Metodologia de Trabalho
 
 ### Ralph Loop (Frontend)
+
 Método iterativo para implementação módulo por módulo:
 
 ```
@@ -204,12 +216,14 @@ Método iterativo para implementação módulo por módulo:
 ```
 
 ### TDD (Backend)
+
 - Escrever testes PRIMEIRO
 - Implementar para passar nos testes
 - Refatorar mantendo testes verdes
 - Mínimo 95% coverage
 
 ### Git Workflow
+
 - Branches por feature: `001-hexagonal-backend-refactor`, `010-refactor-budget`
 - Conventional Commits + Gitmoji: `✨ feat`, `🧪 test`, `📄 docs`
 - Merge para main após validação
@@ -252,6 +266,7 @@ podcast-saas/
 ## 🚀 Comandos Úteis
 
 ### Backend
+
 ```bash
 cd apps/api
 bun install
@@ -261,6 +276,7 @@ bun x drizzle-kit push    # Apply migrations
 ```
 
 ### Frontend
+
 ```bash
 cd apps/web
 bun install
@@ -271,6 +287,7 @@ bun test:coverage          # Coverage report
 ```
 
 ### Database
+
 ```bash
 docker-compose up -d       # Start PostgreSQL
 bun x drizzle-kit push     # Apply schema
@@ -281,6 +298,7 @@ bun x drizzle-kit push     # Apply schema
 ## 📊 Status Atual
 
 ### ✅ Completado
+
 - [x] Backend: 6/6 módulos refatorados (100%)
 - [x] Backend: 42 endpoints funcionais
 - [x] Backend: 250+ testes unitários
@@ -297,6 +315,7 @@ bun x drizzle-kit push     # Apply schema
 - [x] Documentação: Implementation Plan
 
 ### 📋 Pendente (Opcional)
+
 - [ ] Frontend: Atingir 95% coverage (atual: ~88% nos componentes testados)
 - [ ] Frontend: Testes de integração
 - [ ] Frontend: Testes E2E (Playwright/Cypress)
@@ -308,9 +327,11 @@ bun x drizzle-kit push     # Apply schema
 ## 📚 Documentação
 
 ### Design System
+
 - `/docs/design-system/design-system.md` - Completo (800+ linhas)
 
 ### Architecture Decision Records (ADRs)
+
 - `adr-001-frontend-framework.md` - Next.js 16 + React 19
 - `adr-002-state-management.md` - Zustand + TanStack Query
 - `adr-003-forms-validation.md` - React Hook Form + Zod
@@ -318,6 +339,7 @@ bun x drizzle-kit push     # Apply schema
 - `adr-005-tables-data-grid.md` - TanStack Table
 
 ### Product Requirements Documents (PRDs)
+
 - `prd-001-dashboard.md`
 - `prd-002-leads.md`
 - `prd-003-agenda.md`
@@ -327,6 +349,7 @@ bun x drizzle-kit push     # Apply schema
 - `prd-007-settings.md`
 
 ### Implementation Plan
+
 - `/docs/implementation-plan.md` - Ralph Loop method
 
 ---
@@ -334,11 +357,13 @@ bun x drizzle-kit push     # Apply schema
 ## 🔑 Environment Variables
 
 ### Backend (.env)
+
 ```bash
 DATABASE_URL=postgresql://postgres:postgres@localhost:5432/podcast_saas
 ```
 
 ### Frontend (.env.local)
+
 ```bash
 NEXT_PUBLIC_API_URL=http://localhost:3001
 NEXT_PUBLIC_APP_NAME=Podcast SaaS
@@ -349,6 +374,7 @@ NEXT_PUBLIC_APP_NAME=Podcast SaaS
 ## 📞 Contato e Referências
 
 ### Referências Técnicas
+
 - [Shadcn/UI](https://ui.shadcn.com)
 - [TanStack Query](https://tanstack.com/query)
 - [React Hook Form](https://react-hook-form.com)
@@ -356,6 +382,7 @@ NEXT_PUBLIC_APP_NAME=Podcast SaaS
 - [Vitest](https://vitest.dev)
 
 ### Princípios
+
 1. API-First Backend
 2. E2E Testing (mandatório para fluxos críticos)
 3. Minimalist Domain-Driven Design
@@ -367,8 +394,10 @@ NEXT_PUBLIC_APP_NAME=Podcast SaaS
 **Projeto Podcast SaaS POC - 100% Completo** 🎉
 
 ## Active Technologies
+
 - TypeScript 5.x (Bun 1.3.6 runtime) (001-user-auth)
 - PostgreSQL 15 (via Drizzle ORM) - tabela `users` (001-user-auth)
 
 ## Recent Changes
+
 - 001-user-auth: Added TypeScript 5.x (Bun 1.3.6 runtime)
