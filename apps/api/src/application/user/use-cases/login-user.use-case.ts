@@ -51,9 +51,14 @@ export class LoginUserUseCase {
       throw new Error('Invalid credentials');
     }
 
-    // Update last login
-    user.updateLastLogin();
-    await this.userRepository.update(user);
+    // Update last login (optional - don't fail if this fails)
+    try {
+      user.updateLastLogin();
+      await this.userRepository.update(user);
+    } catch (error) {
+      // Log error but don't fail the login
+      console.error('Failed to update last login:', error);
+    }
 
     // Generate tokens
     const accessToken = signAccessToken({
