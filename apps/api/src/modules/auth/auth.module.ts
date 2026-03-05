@@ -10,6 +10,7 @@ import { AuthController } from '../../infrastructure/http/adapters/auth.controll
 import { LogoutController } from '../../infrastructure/http/adapters/logout.controller';
 import { RegisterUserUseCase } from '../../application/user/use-cases/register-user.use-case';
 import { LogoutUserUseCase } from '../../application/user/use-cases/logout-user.use-case';
+import { RefreshTokenUseCase } from '../../application/user/use-cases/refresh-token.use-case';
 
 /**
  * Cria e configura todas as dependências do módulo de autenticação
@@ -22,9 +23,10 @@ export function createAuthModule(): AuthController {
   // Application layer (use cases)
   const registerUseCase = new RegisterUserUseCase(userRepository);
   const logoutUseCase = new LogoutUserUseCase(refreshTokenRepository);
+  const refreshTokenUseCase = new RefreshTokenUseCase(refreshTokenRepository);
 
   // Infrastructure layer (HTTP controllers)
-  const authController = new AuthController(registerUseCase);
+  const authController = new AuthController(registerUseCase, refreshTokenUseCase);
   const logoutController = new LogoutController(logoutUseCase);
 
   // Combine routes into authController

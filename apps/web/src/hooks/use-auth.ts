@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
+import { fetchWithAuth } from '../lib/auth/interceptors';
 
 export interface User {
   userId: string;
@@ -35,12 +36,9 @@ export function useAuth() {
     }
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/me`, {
+      // Use fetchWithAuth for automatic token refresh on 401
+      const response = await fetchWithAuth('/api/auth/me', {
         method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
       });
 
       if (response.ok) {
@@ -76,7 +74,7 @@ export function useAuth() {
 
   const login = useCallback(async (email: string, password: string) => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/login`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -102,17 +100,16 @@ export function useAuth() {
 
   const logout = useCallback(async () => {
     const token = localStorage.getItem('accessToken');
+    const refreshToken = localStorage.getItem('refreshToken');
 
     try {
-      await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/auth/logout`, {
+      await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/auth/logout`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          refreshToken: localStorage.getItem('refreshToken'),
-        }),
+        body: JSON.stringify({ refreshToken }),
       });
     } catch (error) {
       console.error('Logout error:', error);
