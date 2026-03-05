@@ -2,6 +2,7 @@ import { Elysia } from "elysia";
 import { swagger } from "@elysiajs/swagger";
 import { errorMiddleware } from "./middleware/error.middleware";
 import { loggerMiddleware } from "./middleware/logger.middleware";
+import { corsMiddleware } from "./middleware/cors.middleware";
 import { createLeadsModule } from "./modules/leads/leads.module";
 import { createWhitelabelModule } from "./modules/whitelabel/whitelabel.module";
 import { createAgendaModule } from "./modules/agenda/agenda.module";
@@ -21,18 +22,8 @@ const reportModule = createReportModule();
 const authModule = createAuthModule();
 
 const app = new Elysia()
-    .onRequest(({ request, setHeader }) => {
-        // CORS headers for frontend
-        setHeader('Access-Control-Allow-Origin', 'http://localhost:3000');
-        setHeader('Access-Control-Allow-Credentials', 'true');
-        setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-        setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
-        
-        // Handle preflight requests
-        if (request.method === 'OPTIONS') {
-            return new Response(null, { status: 204 });
-        }
-    })
+    // CORS MUST be first - before swagger, error, logger
+    .use(corsMiddleware())
     .use(swagger())
     .use(errorMiddleware)      // Register BEFORE routes
     .use(loggerMiddleware)     // Register BEFORE routes
