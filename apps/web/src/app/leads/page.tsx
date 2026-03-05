@@ -44,7 +44,7 @@ export default function LeadsPage() {
   }
 
   return (
-    <div className="h-[calc(100vh-4rem)] flex flex-col">
+    <div className="space-y-6">
       <PageHeader
         title="Leads Pipeline"
         description="Manage your podcast guests and leads."
@@ -67,7 +67,7 @@ export default function LeadsPage() {
         }
       />
 
-      <div className="flex-1 overflow-hidden">
+      <div className="h-[calc(100vh-280px)]">
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="text-center space-y-4">

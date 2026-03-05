@@ -13,10 +13,10 @@ function DashboardContent() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4" />
-          <p className="text-slate-600">Loading dashboard...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -24,7 +24,7 @@ function DashboardContent() {
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
+      <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center text-destructive">
           <p>Error loading dashboard data</p>
         </div>
@@ -33,46 +33,44 @@ function DashboardContent() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 p-8">
-      <div className="max-w-7xl mx-auto">
-        <PageHeader
-          title="Dashboard"
-          description="Welcome to Podcast SaaS"
+    <div className="space-y-6">
+      <PageHeader
+        title="Dashboard"
+        description="Welcome to Podcast SaaS"
+      />
+
+      {/* KPI Cards */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <KPICard
+          title="Total Leads"
+          value={data?.totalLeads ?? 0}
+          icon={Users}
+          trend={{ value: '+12%', type: 'positive' }}
         />
+        <KPICard
+          title="Monthly Revenue"
+          value={`$${data?.monthlyRevenue ?? 0}`}
+          icon={DollarSign}
+          trend={{ value: '+8.5%', type: 'positive' }}
+        />
+        <KPICard
+          title="Active Episodes"
+          value={data?.activeEpisodes ?? 0}
+          icon={Calendar}
+          trend={{ value: '-2.5%', type: 'negative' }}
+        />
+        <KPICard
+          title="Upcoming Events"
+          value={data?.upcomingEvents ?? 0}
+          icon={TrendingUp}
+          trend={{ value: '+5%', type: 'positive' }}
+        />
+      </div>
 
-        {/* KPI Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-          <KPICard
-            title="Total Leads"
-            value={data?.totalLeads ?? 0}
-            icon={Users}
-            trend={{ value: '+12%', type: 'positive' }}
-          />
-          <KPICard
-            title="Monthly Revenue"
-            value={`$${data?.monthlyRevenue ?? 0}`}
-            icon={DollarSign}
-            trend={{ value: '+8.5%', type: 'positive' }}
-          />
-          <KPICard
-            title="Active Episodes"
-            value={data?.activeEpisodes ?? 0}
-            icon={Calendar}
-            trend={{ value: '-2.5%', type: 'negative' }}
-          />
-          <KPICard
-            title="Upcoming Events"
-            value={data?.upcomingEvents ?? 0}
-            icon={TrendingUp}
-            trend={{ value: '+5%', type: 'positive' }}
-          />
-        </div>
-
-        {/* Charts and Activity */}
-        <div className="grid gap-6 md:grid-cols-2 mb-8">
-          <RevenueChart />
-          <ActivityFeed />
-        </div>
+      {/* Charts and Activity */}
+      <div className="grid gap-6 md:grid-cols-2">
+        <RevenueChart />
+        <ActivityFeed />
       </div>
     </div>
   );
