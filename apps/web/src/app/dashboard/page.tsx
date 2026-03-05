@@ -37,7 +37,7 @@ function DashboardContent() {
       <div className="max-w-7xl mx-auto">
         <PageHeader
           title="Dashboard"
-          subtitle="Welcome to Podcast SaaS"
+          description="Welcome to Podcast SaaS"
         />
 
         {/* KPI Cards */}
@@ -46,25 +46,25 @@ function DashboardContent() {
             title="Total Leads"
             value={data?.totalLeads ?? 0}
             icon={Users}
-            trend={12}
+            trend={{ value: '+12%', type: 'positive' }}
           />
           <KPICard
             title="Monthly Revenue"
             value={`$${data?.monthlyRevenue ?? 0}`}
             icon={DollarSign}
-            trend={8.5}
+            trend={{ value: '+8.5%', type: 'positive' }}
           />
           <KPICard
             title="Active Episodes"
             value={data?.activeEpisodes ?? 0}
             icon={Calendar}
-            trend={-2.5}
+            trend={{ value: '-2.5%', type: 'negative' }}
           />
           <KPICard
             title="Upcoming Events"
             value={data?.upcomingEvents ?? 0}
             icon={TrendingUp}
-            trend={5}
+            trend={{ value: '+5%', type: 'positive' }}
           />
         </div>
 
