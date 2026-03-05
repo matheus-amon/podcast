@@ -1,217 +1,272 @@
-# Implementação User Authentication - Progress Report
+# User Authentication - Implementation Progress
 
 **Data**: 2026-03-05
-**Branch**: 001-user-auth
-**Status**: Phase 8 COMPLETE ✅ - Polish & Security
+**Branch**: main (correção de bugs críticos)
+**Status**: 🐛 Bug Fixing - 2 testes falhando no backend
 
 ---
 
-## ✅ Completed Tasks
+## 📊 Status Geral
 
-### Phase 1: Setup (4/4 - 100%) ✅
-### Phase 2: Foundational (7/7 - 100%) ✅
-### Phase 3: User Story 1 - Register (16/21 - 76%) ✅
-### Phase 4: User Story 2 - Login (10/18 - 56%) ✅
-### Phase 5: User Story 3 - Logout (6/6 - 100%) ✅
-### Phase 6: User Story 4 - Protected Routes (7/7 - 100%) ✅
-### Phase 7: User Story 5 - Session Persistence (8/8 - 100%) ✅
-### Phase 8: Polish & Security (15/15 - 100%) ✅ NEW!
+### Backend
+- **Total Testes**: 256
+- **Passando**: 254 ✅
+- **Falhando**: 2 ❌
+- **Coverage**: 78.21% (lines), 67.44% (funcs)
 
-- [x] T076: Rate limiting no /auth/login (5 tentativas/min) ✅
-- [x] T077: Rate limiting no /auth/register (3 tentativas/min) ✅
-- [x] T078: Password strength meter UI ✅
-- [x] T079: Forgot password link (placeholder) ✅
-- [x] T080: Error messages comprehensivas ✅
-- [x] T081: Logging para eventos de segurança ✅
-- [x] T082: Atualizar OpenAPI documentation ✅
-- [x] T083: Criar README.md do auth module ✅
-- [x] T084: Run full test suite ✅
-- [x] T085: Coverage report ✅
-- [x] T086: TypeScript check ⚠️ (erros existentes, não críticos)
-- [x] T087: E2E tests ✅
-- [x] T088: Security audit ✅
-- [x] T089: Performance test ✅
-- [x] T090: Update QWEN.md ✅
+### Frontend
+- **Total Testes**: 87
+- **Passando**: 87 ✅
+- **Falhando**: 0
+- **Coverage**: Em verificação
+
+### Grand Total
+- **Total**: 343 testes
+- **Passando**: 341 (99.4%)
+- **Falhando**: 2 (0.6%)
 
 ---
 
-## 📊 Test Results
+## 🐛 Bugs Found & Fixed
 
-### Backend Tests
-- Email VO: 14/14 ✅
-- Password VO: 13/13 ✅
-- User Entity: 22/22 ✅
-- Register Use Case: 2/2 ✅
-- Login Use Case: 5/5 ✅
-- Logout Use Case: 4/4 ✅
-- Refresh Token Use Case: 6/6 ✅
-- Auth Guard: 4/4 ✅
-- Rate Limiter: 7/7 ✅ (NEW!)
-- Auth Controller: 4/4 ✅
-- Login Controller: 4/4 ✅
-- Logout Controller: 1/1 ✅
-- User Repository: 4/11 ⚠️ (requires DB)
+### Backend
 
-**Total Backend: 245 testes passando**
+#### Bug #1: Teste de update com usuário não encontrado ❌
+- **Arquivo**: `/home/amon/workspace/person/podcast-saas/apps/api/tests/unit/infrastructure/user-repository.adapter.test.ts:144`
+- **Descrição**: Teste está usando `toThrow` de forma incorreta - a função assíncrona não está envolta em função
+- **Erro**: `Expected value must be a function`
+- **Correção Necessária**: Envolver a chamada assíncrona em uma função arrow
+- **Status**: ⏳ Pendente
 
-### Frontend Tests
-- Register Form: 7/7 ✅
-- Register Page: 3/3 ✅
-- Login Form: 7/7 ✅
-- Login Page: 3/3 ✅
-- Dashboard Page: 2/2 ✅
-- UI Components: 31/31 ✅
-- Feature Components: 28/28 ✅
+```typescript
+// ❌ Jeito errado (atual)
+await expect(repository.update(user)).toThrow('User not found');
 
-**Total Frontend: 87 testes passando**
-
-**Grand Total: 332 testes passando** ✅
-
----
-
-## 📁 Files Created (Phase 8)
-
-### Backend (2 files)
-- `apps/api/src/modules/auth/README.md` ✅
-- `apps/api/tests/unit/middleware/rate-limit.test.ts` ✅
-- Updated `apps/api/src/infrastructure/http/adapters/login.controller.ts` ✅
-- Updated `apps/api/src/infrastructure/http/adapters/auth.controller.ts` ✅
-
-### Frontend (2 files)
-- `apps/web/src/components/auth/password-strength-meter.tsx` ✅
-- Updated `apps/web/src/components/auth/register-form.tsx` ✅
-- Updated `apps/web/src/components/auth/login-form.tsx` ✅
-
----
-
-## 🔒 Security Features Implemented
-
-### Rate Limiting
-- **Login:** 5 tentativas por minuto por IP
-- **Register:** 3 tentativas por minuto por IP
-- **Resposta 429:** Inclui retry-after header
-
-### Password Strength
-- UI com medidor visual de força
-- Requisitos: 8+ caracteres, uppercase, lowercase, número, special char
-- Validação em tempo real
-
-### Token Security
-- JWT access token: 15min expiry
-- JWT refresh token: 7 days expiry
-- Token rotation em cada refresh
-- Revogação no logout
-
-### Error Handling
-- Mensagens de erro genéricas para usuário
-- Logs detalhados no servidor
-- Prevenção de enumeração de usuários
-
----
-
-## 📝 Notes
-
-- **Register Feature**: 100% complete ✅
-- **Login Feature**: 100% complete ✅
-- **Logout Feature**: 100% complete ✅
-- **Protected Routes**: 100% complete ✅
-- **Session Persistence**: 100% complete ✅
-- **Polish & Security**: 100% complete ✅ (NEW!)
-- **Backend**: All 5 endpoints functional ✅
-- **Frontend**: Complete auth flow ✅
-- **TDD**: Tests written before implementation ✅
-- **Tests**: 332 testes passando (245 backend + 87 frontend)
-
-**Phase 8: 100% complete (15/15 tasks)** ✅
-
----
-
-## 🏗️ Architecture Summary
-
-### Complete Auth Flow
-
-**Backend Endpoints:**
-```
-POST /api/auth/register    → Create account (rate limit: 3/min)
-POST /api/auth/login       → Authenticate (rate limit: 5/min)
-POST /api/auth/logout      → Revoke tokens
-POST /api/auth/refresh     → Refresh tokens (rotation)
-GET  /api/auth/me          → Get current user (protected)
+// ✅ Jeito correto
+await expect(async () => repository.update(user)).rejects.toThrow('User not found');
 ```
 
-**Frontend Components:**
-```
-<RegisterForm />           → Com password strength meter
-<LoginForm />              → Com forgot password link
-<PasswordStrengthMeter />  → UI de força da senha
-useAuth hook               → Auth state management
-fetchWithAuth              → Auto token refresh
-withAuth HOC               → Route protection
+#### Bug #2: Teste de soft delete ❌
+- **Arquivo**: `/home/amon/workspace/person/podcast-saas/apps/api/tests/unit/infrastructure/user-repository.adapter.test.ts:160`
+- **Descrição**: Teste espera que `deletedAt` esteja definido após soft delete, mas o método delete não está atualizando o campo
+- **Erro**: `expect(received).toBeDefined() - Received: undefined`
+- **Causa Raiz**: Mudança no tipo da coluna `id` de `integer` para `text` no repository adapter
+- **Files relacionados**:
+  - `/home/amon/workspace/person/podcast-saas/apps/api/src/infrastructure/database/adapters/user-repository.adapter.ts`
+- **Status**: ⏳ Pendente
+
+```typescript
+// Mudanças recentes no user-repository.adapter.ts:
+// Linha 18: id: dbUser.id (era parseInt(dbUser.id))
+// Linha 57: eq(users.id, id) (era parseInt(id))
+// Linha 111: eq(users.id, user.id) (era parseInt(user.id))
+// Linha 133: eq(users.id, id) (era parseInt(id))
 ```
 
-**Security:**
-- ✅ Rate limiting por IP
-- ✅ Password hashing (bcrypt)
-- ✅ JWT token rotation
-- ✅ Token revocation
-- ✅ Automatic refresh on 401
-- ✅ Session persistence
-- ✅ Comprehensive error messages
+#### Mudanças Identificadas no Backend
+
+**user-repository.adapter.ts**:
+- Removido `parseInt()` das comparações de ID
+- ID agora é tratado como string em vez de número
+- **Impacto**: Testes de update e delete falhando
+
+**auth.controller.ts**:
+- Adicionado endpoints de login e logout no mesmo controller
+- Unificado controllers (AuthController agora inclui LoginController e LogoutController)
+- Prefixo alterado de `/auth` para `/api/auth`
+- **Impacto**: 136 linhas adicionadas
+
+**auth.module.ts**:
+- Simplificado para usar único AuthController
+- Removido controllers separados (LoginController, LogoutController)
+- **Impacto**: 13 linhas modificadas
+
+### Frontend
+
+#### Mudanças Identificadas
+
+**dashboard/page.tsx**:
+- Loading state com altura fixa (400px) em vez de tela cheia
+- Cores atualizadas para usar variáveis do Design System (`border-primary`, `text-muted-foreground`)
+- Removido `min-h-screen` e `bg-slate-50`
+- **Impacto**: 82 linhas modificadas
+
+**layout.tsx**:
+- 14 linhas modificadas (detalhes em verificação)
+
+**leads/page.tsx**:
+- 4 linhas modificadas (detalhes em verificação)
+
+**page.tsx**:
+- 16 linhas modificadas (detalhes em verificação)
 
 ---
 
-## 📋 Session Context
+## ✅ Test Status Detalhado
 
-### O que foi feito nesta sessão (2026-03-05)
+### Backend - Testes Passando (254/256)
 
-**Phase 7 - Session Persistence (Completo):**
-- ✅ RefreshTokenUseCase com token rotation
-- ✅ POST /auth/refresh endpoint
-- ✅ OpenAPI documentation
-- ✅ E2E tests (7 testes)
-- ✅ Unit tests (6 testes)
-- ✅ Frontend interceptor (fetchWithAuth)
-- ✅ Automatic token refresh on 401
-- ✅ Session persistence no use-auth hook
+```
+✅ Rate Limiter: 7/7
+✅ Auth Guard: 4/4
+✅ Login Controller: 4/4
+✅ Auth Controller (register): 4/4
+✅ Postgres User Repository: 9/11 (2 falhando)
+✅ Logout Controller: 1/1
+✅ Get Whitelabel Config: 3/3
+✅ Update Whitelabel Config: 7/7
+✅ Whitelabel Config Entity: 36/36
+✅ BaseEntity: 6/6
+✅ Agenda Event: 23/23
+✅ Payment Entity: 36/36
+✅ Invoice Entity: 36/36
+✅ Time Period: 6/6
+✅ Budget Template: 33/33
+✅ Budget Entity: 49/49
+```
 
-**Phase 8 - Polish & Security (Completo):**
-- ✅ Rate limiting no login (5/min)
-- ✅ Rate limiting no register (3/min)
+### Backend - Testes Falhando (2/256)
+
+```
+❌ PostgresUserRepository > update > should throw error if user not found
+❌ PostgresUserRepository > delete > should soft delete user
+```
+
+### Frontend - Testes Passando (87/87)
+
+```
+✅ login-form: 7/7
+✅ dashboard/page-header: 7/7
+✅ ui/input: 6/6
+✅ ui/badge: 8/8
+✅ dashboard/kpi-card: 3/3
+✅ ui/button: 10/10
+✅ ui/card: 7/7
+✅ dashboard/revenue-chart: 5/5
+✅ login/page: 3/3
+✅ register/page: 3/3
+✅ register-form: 7/7
+✅ dashboard/page: 2/2
+✅ budget-columns: 6/6
+✅ episode-columns: 5/5
+✅ invoice-columns: 8/8
+```
+
+---
+
+## 📝 Commits Pendentes
+
+### Commit 1: Correção de testes do User Repository
+```
+🧪 fix(backend): corrigir testes do user-repository adapter
+
+- Corrigir teste de update para usar async/await corretamente
+- Corrigir teste de delete para verificar soft delete
+- Ajustar expectativa do campo deletedAt
+
+Bug: Testes falhando devido a sintaxe incorreta de expect()
+Fix: Usar rejects.toThrow() para testes assíncronos
+
+Affected: apps/api/tests/unit/infrastructure/user-repository.adapter.test.ts
+```
+
+### Commit 2: Refatoração do Auth Controller (se necessário)
+```
+♻️ refactor(backend): unificar auth controllers
+
+- Consolidar LoginController e LogoutController no AuthController
+- Remover controllers separados
+- Simplificar auth.module.ts
+- Manter prefixo /api/auth consistente
+
+Affected: 
+- apps/api/src/infrastructure/http/adapters/auth.controller.ts
+- apps/api/src/modules/auth/auth.module.ts
+```
+
+### Commit 3: Ajustes no Frontend
+```
+🎨 style(frontend): atualizar componentes do dashboard
+
+- Usar variáveis do Design System (border-primary, text-muted-foreground)
+- Ajustar loading state com altura fixa
+- Remover estilos hardcoded
+
+Affected:
+- apps/web/src/app/dashboard/page.tsx
+- apps/web/src/app/layout.tsx
+- apps/web/src/app/leads/page.tsx
+- apps/web/src/app/page.tsx
+```
+
+---
+
+## 🔄 Próximos Passos
+
+### Imediato (Bug Fixing)
+1. ✅ Corrigir teste `should throw error if user not found`
+   - Arquivo: `apps/api/tests/unit/infrastructure/user-repository.adapter.test.ts`
+   - Linha: 144
+   - Correção: `await expect(async () => repository.update(user)).rejects.toThrow('User not found')`
+
+2. ✅ Investigar e corrigir teste `should soft delete user`
+   - Arquivo: `apps/api/tests/unit/infrastructure/user-repository.adapter.test.ts`
+   - Linha: 160
+   - Verificar se método `delete` está atualizando campo `deletedAt`
+
+3. ✅ Rodar testes backend para validar correções
+   ```bash
+   cd apps/api && bun test tests/unit/infrastructure/user-repository.adapter.test.ts
+   ```
+
+4. ✅ Validar todos os testes backend
+   ```bash
+   cd apps/api && bun test tests/unit/
+   ```
+
+5. ✅ Validar todos os testes frontend
+   ```bash
+   cd apps/web && bun test:run
+   ```
+
+### Após Correção dos Bugs
+1. 📝 Criar commits semânticos para cada correção
+2. 📋 Atualizar QWEN.md com status atual
+3. 🔍 Revisar mudanças de ID (string vs integer)
+4. 📚 Documentar lições aprendidas
+
+---
+
+## 📋 Lições Aprendidas
+
+### Problemas Identificados
+1. **Sintaxe de teste assíncrono**: `expect().toThrow()` não funciona com Promises - precisa usar `rejects.toThrow()`
+2. **Tipo de ID**: Mudança de integer para string requer atualização em todas as comparações
+3. **Testes de integração**: Testes que dependem de DB são mais frágeis a mudanças de schema
+
+### Boas Práticas
+1. ✅ TDD funciona - testes falhando indicam problemas antes de produção
+2. ✅ Testes unitários de domínio estão 100% (entities, value objects, use cases)
+3. ✅ Frontend está 100% nos testes de componentes
+
+---
+
+## 📊 Histórico de Sessões
+
+### Sessão Anterior (2026-03-05 - Phase 8)
+- ✅ Rate limiting implementado (login: 5/min, register: 3/min)
 - ✅ Password strength meter UI
-- ✅ Forgot password link (placeholder)
 - ✅ README.md do auth module
-- ✅ Rate limiter tests (7 testes)
-- ✅ Validação final (332 testes)
+- ✅ 332 testes passando (245 backend + 87 frontend)
+- ✅ Commit: `08bc2dc ✨ feat: implement Phase 7 - Session Persistence (US5)`
 
-**Commits:**
-```
-08bc2dc ✨ feat: implement Phase 7 - Session Persistence (US5)
-```
-
-### Comandos para validar
-
-```bash
-# Backend tests
-cd apps/api && bun test tests/unit/
-
-# Frontend tests
-cd apps/web && bun test:run
-
-# Start backend server
-cd apps/api && bun run src/index.ts
-
-# Start frontend dev server
-cd apps/web && bun dev
-```
-
-### Pontos de Atenção
-
-1. **Rate Limiting**: Implementado e testado
-2. **Password Strength**: UI com feedback visual em tempo real
-3. **Token Rotation**: Segurança com revogação de tokens antigos
-4. **TypeScript**: Alguns erros existentes (não críticos para auth)
-5. **Coverage**: >90% nos módulos de auth
+### Sessão Atual (2026-03-05 - Bug Fixing)
+- 🐛 2 testes falhando no backend (user-repository)
+- 📝 Mudanças não documentadas em auth.controller.ts
+- 🎨 Ajustes de estilo no frontend
+- ⏳ Aguardando correção dos bugs para commit
 
 ---
 
-**Próxima sessão**: Validação final, commit da Phase 8 e merge para main.
+**Status**: 🐛 Bug fixing em andamento
+**Próxima Ação**: Corrigir testes do user-repository adapter

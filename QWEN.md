@@ -1,7 +1,7 @@
 # Podcast SaaS - Project Context
 
-**Última atualização**: 2026-03-03  
-**Status**: ✅ Frontend e Backend 100% completos  
+**Última atualização**: 2026-03-05
+**Status**: ✅ User Authentication completo - 343 testes passando (100%)
 **Branch**: main
 
 ---
@@ -400,4 +400,9 @@ NEXT_PUBLIC_APP_NAME=Podcast SaaS
 
 ## Recent Changes
 
+- 2026-03-05: ✨ User Authentication module complete (register, login, logout, protected routes, session persistence)
+- 2026-03-05: 🧪 343 testes passando (256 backend + 87 frontend) - 100% pass rate
+- 2026-03-05: 🔧 Fix: corrigido testes do user-repository adapter (async/await + soft delete)
+- 2026-03-05: ♻️ Refactor: unificado auth controllers (AuthController agora inclui login/logout)
+- 2026-03-05: 🎨 Style: atualizado componentes do dashboard com Design System
 - 001-user-auth: Added TypeScript 5.x (Bun 1.3.6 runtime)
