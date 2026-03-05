@@ -141,7 +141,7 @@ describe('PostgresUserRepository', () => {
       });
 
       // Don't create user in DB, just try to update
-      await expect(repository.update(user)).toThrow('User not found');
+      await expect(repository.update(user)).rejects.toThrow('User not found');
     });
   });
 
@@ -156,8 +156,9 @@ describe('PostgresUserRepository', () => {
       const created = await repository.create(user);
       await repository.delete(created.id);
 
+      // After soft delete, user should not be found by ID
       const found = await repository.findById(created.id);
-      expect(found?.deletedAt).toBeDefined();
+      expect(found).toBeNull();
     });
 
     it('should not find soft deleted user by email', async () => {
