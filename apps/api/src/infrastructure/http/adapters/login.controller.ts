@@ -20,8 +20,8 @@ export class LoginController {
    */
   private createRoutes(): Elysia {
     return (
-      new Elysia({ prefix: "/auth" })
-        // POST /auth/login (Rate limit: 10 attempts per minute)
+      new Elysia() // NO prefix - will be mounted under /auth by AuthController
+        // POST /login (Rate limit: 10 attempts per minute)
         .use(rateLimiter(10))
         .post(
           "/login",

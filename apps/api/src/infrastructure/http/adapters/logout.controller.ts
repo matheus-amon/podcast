@@ -18,8 +18,8 @@ export class LogoutController {
    * Create logout routes
    */
   private createRoutes(): Elysia {
-    return new Elysia({ prefix: '/auth' })
-      // POST /auth/logout
+    return new Elysia() // NO prefix - will be mounted under /auth by AuthController
+      // POST /logout
       .post(
         '/logout',
         async ({ headers, set }) => {
