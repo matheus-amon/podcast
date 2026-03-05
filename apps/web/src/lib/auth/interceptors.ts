@@ -105,18 +105,21 @@ export function createAuthFetch(
  * Fetch wrapper with automatic token refresh
  */
 export async function fetchWithAuth(
-  endpoint: string,
+  url: string,
   options: RequestInit = {}
 ): Promise<Response> {
   const accessToken = localStorage.getItem('accessToken');
   const refreshToken = localStorage.getItem('refreshToken');
+
+  // If URL is relative, make it absolute
+  const fullUrl = url.startsWith('http') ? url : `${API_BASE_URL}${url}`;
 
   if (!accessToken) {
     throw new Error('No access token available');
   }
 
   // First attempt with current token
-  let response = await fetch(`${API_BASE_URL}${endpoint}`, {
+  let response = await fetch(fullUrl, {
     ...options,
     headers: {
       'Content-Type': 'application/json',
@@ -137,7 +140,7 @@ export async function fetchWithAuth(
         localStorage.setItem('refreshToken', tokens.refreshToken);
 
         // Retry the original request with new token
-        response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        response = await fetch(fullUrl, {
           ...options,
           headers: {
             'Content-Type': 'application/json',
