@@ -29,13 +29,12 @@ export function createAuthModule(): AuthController {
   const refreshTokenUseCase = new RefreshTokenUseCase(refreshTokenRepository);
 
   // Infrastructure layer (HTTP controllers)
-  const authController = new AuthController(registerUseCase, refreshTokenUseCase);
-  const loginController = new LoginController(loginUseCase);
-  const logoutController = new LogoutController(logoutUseCase);
-
-  // Combine routes into authController
-  authController.routes.use(loginController.routes);
-  authController.routes.use(logoutController.routes);
+  const authController = new AuthController(
+    registerUseCase,
+    loginUseCase,
+    logoutUseCase,
+    refreshTokenUseCase
+  );
 
   return authController;
 }

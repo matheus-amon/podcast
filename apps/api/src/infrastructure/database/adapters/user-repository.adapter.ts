@@ -1,6 +1,6 @@
 /**
  * Postgres User Repository
- * 
+ *
  * PostgreSQL implementation of User Repository
  */
 
@@ -15,7 +15,7 @@ import type { IUserRepository } from '../../../domain/user/ports/user-repository
  */
 function mapDbToDomain(dbUser: DbUser): User {
   return User.fromProps({
-    id: dbUser.id.toString(),
+    id: dbUser.id,
     email: dbUser.email,
     passwordHash: dbUser.passwordHash,
     name: dbUser.name,
@@ -54,7 +54,7 @@ export class PostgresUserRepository implements IUserRepository {
   async findById(id: string): Promise<User | null> {
     const result = await db.query.users.findFirst({
       where: and(
-        eq(users.id, parseInt(id)),
+        eq(users.id, id),
         isNull(users.deletedAt)
       ),
     });
@@ -108,7 +108,7 @@ export class PostgresUserRepository implements IUserRepository {
         updatedAt: new Date(),
       })
       .where(and(
-        eq(users.id, parseInt(user.id)),
+        eq(users.id, user.id),
         isNull(users.deletedAt)
       ))
       .returning();
@@ -130,6 +130,6 @@ export class PostgresUserRepository implements IUserRepository {
         deletedAt: new Date(),
         updatedAt: new Date(),
       })
-      .where(eq(users.id, parseInt(id)));
+      .where(eq(users.id, id));
   }
 }
