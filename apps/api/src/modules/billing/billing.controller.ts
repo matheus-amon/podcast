@@ -1,7 +1,7 @@
 import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { billing, billingStatusEnum } from "../../db/schema";
-import { eq, desc, sum } from "drizzle-orm";
+import { eq, desc, sum, sql } from "drizzle-orm";
 
 // Type helper from enum
 type BillingStatus = typeof billingStatusEnum.enumValues[number];
@@ -11,17 +11,19 @@ export const billingRoutes = new Elysia({ prefix: "/billing" })
         return await db.select().from(billing).orderBy(desc(billing.dueDate));
     })
     .get("/summary", async () => {
-        // Calculate totals
-        const totalBilled = await db.select({ value: sum(billing.amount) }).from(billing);
-        const totalPaid = await db.select({ value: sum(billing.amount) }).from(billing).where(eq(billing.status, 'PAID'));
-        const totalPending = await db.select({ value: sum(billing.amount) }).from(billing).where(eq(billing.status, 'PENDING'));
-        const totalOverdue = await db.select({ value: sum(billing.amount) }).from(billing).where(eq(billing.status, 'OVERDUE'));
+        // Calculate totals using a single query with conditional aggregation
+        const [result] = await db.select({
+            totalBilled: sql<number>`COALESCE(SUM(${billing.amount}), 0)`,
+            totalPaid: sql<number>`COALESCE(SUM(CASE WHEN ${billing.status} = 'PAID' THEN ${billing.amount} ELSE 0 END), 0)`,
+            totalPending: sql<number>`COALESCE(SUM(CASE WHEN ${billing.status} = 'PENDING' THEN ${billing.amount} ELSE 0 END), 0)`,
+            totalOverdue: sql<number>`COALESCE(SUM(CASE WHEN ${billing.status} = 'OVERDUE' THEN ${billing.amount} ELSE 0 END), 0)`,
+        }).from(billing);
 
         return {
-            totalBilled: totalBilled[0]?.value || 0,
-            totalPaid: totalPaid[0]?.value || 0,
-            totalPending: totalPending[0]?.value || 0,
-            totalOverdue: totalOverdue[0]?.value || 0,
+            totalBilled: Number(result?.totalBilled) || 0,
+            totalPaid: Number(result?.totalPaid) || 0,
+            totalPending: Number(result?.totalPending) || 0,
+            totalOverdue: Number(result?.totalOverdue) || 0,
         };
     })
     .post("/", async ({ body }) => {
