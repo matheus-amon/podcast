@@ -3,6 +3,7 @@ import { swagger } from "@elysiajs/swagger";
 import { errorMiddleware } from "./middleware/error.middleware";
 import { loggerMiddleware } from "./middleware/logger.middleware";
 import { corsMiddleware } from "./middleware/cors.middleware";
+import { authGuardMiddleware } from "./middleware/auth-guard";
 import { createLeadsModule } from "./modules/leads/leads.module";
 import { createWhitelabelModule } from "./modules/whitelabel/whitelabel.module";
 import { createAgendaModule } from "./modules/agenda/agenda.module";
@@ -36,13 +37,14 @@ const app = new Elysia()
     })
     .group("/api", (app) =>
         app
+            .use(authModule.routes)       // Auth module (new) - public endpoints like login/refresh
+            .use(authGuardMiddleware())   // Protect all routes registered below this line
             .use(leadsModule.routes)      // New hexagonal module
             .use(whitelabelModule.routes) // New hexagonal module
             .use(agendaModule.routes)     // New hexagonal module
             .use(budgetModule.routes)     // New hexagonal module
             .use(billingModule.routes)    // New hexagonal module
             .use(reportModule.routes)     // New hexagonal module
-            .use(authModule.routes)       // Auth module (new)
             .use(dashboardRoutes)         // Legacy - to be removed
     )
     .listen(3001);
