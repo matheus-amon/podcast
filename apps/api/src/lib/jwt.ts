@@ -6,7 +6,14 @@
 
 import jwt from 'jsonwebtoken';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+const JWT_SECRET = process.env.JWT_SECRET;
+
+if (!JWT_SECRET) {
+  console.error('❌ JWT_SECRET environment variable is not set');
+  console.error('Please set JWT_SECRET in your .env file or environment.');
+  throw new Error('JWT_SECRET is required but was not provided');
+}
+
 const JWT_EXPIRES_IN = '15m'; // Access token: 15 minutes
 const REFRESH_TOKEN_EXPIRES_IN = '7d'; // Refresh token: 7 days
 
