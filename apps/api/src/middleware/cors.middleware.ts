@@ -6,8 +6,9 @@
 
 import { Elysia } from 'elysia';
 
+const defaultOrigin = 'http://localhost:3000';
+
 const CORS_CONFIG = {
-  origin: 'http://localhost:3000',
   credentials: true,
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
@@ -19,8 +20,24 @@ export function corsMiddleware() {
     name: 'cors-middleware',
   })
     .onRequest(({ request, set }) => {
+      // Re-evaluate on every request for dynamic behavior and testing
+      const allowedOrigins = process.env.ALLOWED_ORIGINS
+        ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+        : [defaultOrigin];
+
+      // Determine allowed origin based on request Origin header
+      const requestOrigin = request.headers.get('origin');
+
+      let allowedOrigin = defaultOrigin;
+      if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
+        allowedOrigin = requestOrigin;
+      } else if (allowedOrigins.length === 1 && allowedOrigins[0] !== defaultOrigin) {
+        // If there's only one allowed origin configured and it's not the default, use it
+        allowedOrigin = allowedOrigins[0];
+      }
+
       // Set CORS headers for all responses
-      set.headers['Access-Control-Allow-Origin'] = CORS_CONFIG.origin;
+      set.headers['Access-Control-Allow-Origin'] = allowedOrigin;
       set.headers['Access-Control-Allow-Credentials'] = 'true';
       set.headers['Access-Control-Allow-Headers'] = CORS_CONFIG.allowedHeaders.join(', ');
       set.headers['Access-Control-Allow-Methods'] = CORS_CONFIG.methods.join(', ');
@@ -32,7 +49,7 @@ export function corsMiddleware() {
         return new Response(null, {
           status: 204,
           headers: {
-            'Access-Control-Allow-Origin': CORS_CONFIG.origin,
+            'Access-Control-Allow-Origin': allowedOrigin,
             'Access-Control-Allow-Credentials': 'true',
             'Access-Control-Allow-Headers': CORS_CONFIG.allowedHeaders.join(', '),
             'Access-Control-Allow-Methods': CORS_CONFIG.methods.join(', '),
