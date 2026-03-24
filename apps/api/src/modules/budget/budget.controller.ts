@@ -12,13 +12,15 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
         return await db.select().from(budget).orderBy(desc(budget.date));
     })
     .get("/summary", async () => {
-        // Calculate totals
-        const income = await db.select({ value: sum(budget.amount) }).from(budget).where(eq(budget.type, 'INCOME'));
-        const expense = await db.select({ value: sum(budget.amount) }).from(budget).where(eq(budget.type, 'EXPENSE'));
+        // Calculate totals efficiently in a single query
+        const totals = await db.select({
+            income: sql<number>`COALESCE(SUM(CASE WHEN ${budget.type} = 'INCOME' THEN ${budget.amount} ELSE 0 END), 0)`,
+            expense: sql<number>`COALESCE(SUM(CASE WHEN ${budget.type} = 'EXPENSE' THEN ${budget.amount} ELSE 0 END), 0)`,
+        }).from(budget);
 
-        // Fix: Handle null results properly with optional chaining
-        const incomeValue = income[0]?.value ? Number(income[0].value) : 0;
-        const expenseValue = expense[0]?.value ? Number(expense[0].value) : 0;
+        // Safely extract the calculated values and ensure they are numbers
+        const incomeValue = totals[0]?.income ? Number(totals[0].income) : 0;
+        const expenseValue = totals[0]?.expense ? Number(totals[0].expense) : 0;
 
         return {
             totalIncome: incomeValue,
