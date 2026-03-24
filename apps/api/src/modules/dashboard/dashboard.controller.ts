@@ -5,39 +5,50 @@ import { sql, desc, count, and, gte, lte, eq } from "drizzle-orm";
 
 export const dashboardRoutes = new Elysia({ prefix: "/dashboard" })
     .get("/metrics", async () => {
-        // 1. Leads Count (Total)
-        const [leadsResult] = await db.select({ value: count() }).from(leads);
-
-        // 2. Active Episodes (Not Published)
-        const [activeEpisodesResult] = await db.select({ value: count() }).from(episodes).where(sql`${episodes.status} != 'PUBLISHED'`);
-
         // 3. Revenue (Current Month) - Use date string for date column comparison
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
         const startDateStr = startOfMonth.toISOString().split('T')[0]; // YYYY-MM-DD format
 
-        const [revenueResult] = await db.select({ value: sql<number>`sum(${budget.amount})` })
-            .from(budget)
-            .where(and(
-                eq(budget.type, 'INCOME'),
-                gte(budget.date, startDateStr!)
-            ));
-
         // 4. Upcoming Events (Next 7 days)
         const nextWeek = new Date();
         nextWeek.setDate(nextWeek.getDate() + 7);
-        const [upcomingEventsResult] = await db.select({ value: count() })
-            .from(agenda)
-            .where(and(
-                gte(agenda.startDate, new Date()),
-                lte(agenda.startDate, nextWeek)
-            ));
+
+        // Execute all independent queries concurrently using Promise.all
+        const [
+            leadsResultArray,
+            activeEpisodesResultArray,
+            revenueResultArray,
+            upcomingEventsResultArray
+        ] = await Promise.all([
+            // 1. Leads Count (Total)
+            db.select({ value: count() }).from(leads),
+
+            // 2. Active Episodes (Not Published)
+            db.select({ value: count() }).from(episodes).where(sql`${episodes.status} != 'PUBLISHED'`),
+
+            // 3. Revenue (Current Month)
+            db.select({ value: sql<number>`sum(${budget.amount})` })
+                .from(budget)
+                .where(and(
+                    eq(budget.type, 'INCOME'),
+                    gte(budget.date, startDateStr!)
+                )),
+
+            // 4. Upcoming Events (Next 7 days)
+            db.select({ value: count() })
+                .from(agenda)
+                .where(and(
+                    gte(agenda.startDate, new Date()),
+                    lte(agenda.startDate, nextWeek)
+                ))
+        ]);
 
         return {
-            totalLeads: leadsResult?.value || 0,
-            activeEpisodes: activeEpisodesResult?.value || 0,
-            monthlyRevenue: revenueResult?.value || 0,
-            upcomingEvents: upcomingEventsResult?.value || 0
+            totalLeads: leadsResultArray[0]?.value || 0,
+            activeEpisodes: activeEpisodesResultArray[0]?.value || 0,
+            monthlyRevenue: revenueResultArray[0]?.value || 0,
+            upcomingEvents: upcomingEventsResultArray[0]?.value || 0
         };
     })
     .get("/charts/revenue", async () => {
