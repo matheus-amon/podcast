@@ -56,6 +56,7 @@ export interface IBudgetRepository {
   findAll(filters?: BudgetFilters): Promise<Budget[]>;
   findPaginated(filters?: BudgetFilters & { page?: number; limit?: number }): Promise<PaginatedBudgetResult>;
   create(budget: Budget): Promise<Budget>;
+  createMany(budgets: Budget[]): Promise<Budget[]>;
   update(budget: Budget): Promise<Budget>;
   delete(id: string): Promise<void>;
 

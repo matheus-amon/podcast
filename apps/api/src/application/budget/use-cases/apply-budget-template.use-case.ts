@@ -36,23 +36,21 @@ export class ApplyBudgetTemplateUseCase {
     }
 
     // Criar budgets a partir do template
-    const appliedBudgets: Budget[] = [];
     const applyDate = input.date ?? new Date();
     const applyStatus = input.status ?? BudgetStatus.PLANNED;
 
-    for (const item of template.items) {
-      const budget = Budget.create({
+    const budgetsToCreate = template.items.map((item) =>
+      Budget.create({
         concept: item.concept,
         amount: item.amount,
         type: item.type,
         category: item.category,
         date: applyDate,
         status: applyStatus,
-      });
+      })
+    );
 
-      const created = await this.budgetRepository.create(budget);
-      appliedBudgets.push(created);
-    }
+    const appliedBudgets = await this.budgetRepository.createMany(budgetsToCreate);
 
     return {
       templateName: template.name,

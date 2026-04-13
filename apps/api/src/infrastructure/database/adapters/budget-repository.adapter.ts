@@ -153,6 +153,22 @@ export class PostgresBudgetRepository implements IBudgetRepository {
   }
 
   /**
+   * Criar múltiplos budgets (Batch Insert)
+   */
+  async createMany(budgets: Budget[]): Promise<Budget[]> {
+    if (budgets.length === 0) return [];
+
+    const dbData = budgets.map(mapDomainToDb);
+
+    const results = await db
+      .insert(budget)
+      .values(dbData)
+      .returning();
+
+    return results.map(mapDbToDomain);
+  }
+
+  /**
    * Atualizar budget
    */
   async update(budgetEntity: Budget): Promise<Budget> {
