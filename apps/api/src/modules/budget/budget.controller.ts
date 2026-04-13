@@ -102,15 +102,18 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
 
         if (!template || !template.items) throw new Error("Template not found or empty");
 
-        const createdItems = [];
-        for (const item of template.items) {
-            const [newItem] = await db.insert(budget).values({
-                ...item,
-                type: item.type as BudgetType | undefined,
-                status: 'PLANNED', // Default status for applied templates
-                date: new Date().toISOString().split('T')[0],
-            }).returning();
-            createdItems.push(newItem);
+        if (template.items.length === 0) {
+            return [];
         }
+
+        const currentDate = new Date().toISOString().split('T')[0];
+        const newItems = template.items.map(item => ({
+            ...item,
+            type: item.type as BudgetType | undefined,
+            status: 'PLANNED' as BudgetStatus, // Default status for applied templates
+            date: currentDate,
+        }));
+
+        const createdItems = await db.insert(budget).values(newItems).returning();
         return createdItems;
     });
