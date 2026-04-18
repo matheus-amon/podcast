@@ -49,16 +49,20 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
         })
     })
     .put("/:id", async ({ params: { id }, body }) => {
+        const budgetId = typeof id === 'string' ? parseInt(id) : id;
         const [updated] = await db.update(budget)
             .set({
                 ...body,
                 type: body.type as BudgetType | undefined,
                 status: body.status as BudgetStatus | undefined,
             })
-            .where(eq(budget.id, parseInt(id)))
+            .where(eq(budget.id, budgetId))
             .returning();
         return updated;
     }, {
+        params: t.Object({
+            id: t.Numeric()
+        }),
         body: t.Object({
             concept: t.Optional(t.String()),
             amount: t.Optional(t.Number()),
@@ -70,8 +74,13 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
         })
     })
     .delete("/:id", async ({ params: { id } }) => {
-        await db.delete(budget).where(eq(budget.id, parseInt(id)));
+        const budgetId = typeof id === 'string' ? parseInt(id) : id;
+        await db.delete(budget).where(eq(budget.id, budgetId));
         return { success: true };
+    }, {
+        params: t.Object({
+            id: t.Numeric()
+        })
     })
 
     // --- TEMPLATES ---
@@ -96,8 +105,9 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
         })
     })
     .post("/templates/:id/apply", async ({ params: { id } }) => {
+        const templateId = typeof id === 'string' ? parseInt(id) : id;
         const template = await db.query.budgetTemplates.findFirst({
-            where: eq(budgetTemplates.id, parseInt(id))
+            where: eq(budgetTemplates.id, templateId)
         });
 
         if (!template || !template.items) throw new Error("Template not found or empty");
@@ -116,4 +126,8 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
 
         const createdItems = await db.insert(budget).values(newItems).returning();
         return createdItems;
+    }, {
+        params: t.Object({
+            id: t.Numeric()
+        })
     });
