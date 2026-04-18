@@ -1,4 +1,13 @@
-import { Elysia, t } from "elysia";
+const fs = require('fs');
+
+let code = fs.readFileSync('apps/api/src/modules/agenda/agenda.controller.ts', 'utf-8');
+
+// The issue "Spread types may only be created from object types" happens because we didn't define \`body\` type or params types for \`({ body })\`. Wait, Elysia infers it correctly if we type it properly, but something broke with \`t.Object\` inference.
+// Ah, the \`body\` must have a generic or the Elysia import we are using isn't matching up properly with TypeScript's strict mode, or maybe because we use `(id as unknown as string)` which caused issues.
+
+// Actually, let's revert to the original file, and only add the \`params: t.Object({ id: t.Numeric() })\` WITHOUT removing \`parseInt(id)\` and WITHOUT touching anything else. Because \`parseInt\` perfectly handles the string coming from Elysia, and adding \`t.Numeric()\` will perform validation BEFORE the handler is executed (which was the security goal).
+
+code = `import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { agenda, episodes, scripts, productionTasks, eventTypeEnum, episodeStatusEnum, taskStatusEnum } from "../../db/schema";
 import { eq, and, gte, lte, desc } from "drizzle-orm";
@@ -21,7 +30,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
         }
         return await db.select().from(agenda).where(and(...whereClause));
     })
-    .post("/events", async ({ body }: any) => {
+    .post("/events", async ({ body }) => {
         const [newEvent] = await db.insert(agenda).values({
             ...body,
             startDate: new Date(body.startDate),
@@ -47,7 +56,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
     .get("/episodes", async () => {
         return await db.select().from(episodes).orderBy(desc(episodes.createdAt));
     })
-    .get("/episodes/:id", async ({ params: { id } }: any) => {
+    .get("/episodes/:id", async ({ params: { id } }) => {
         const episode = await db.query.episodes.findFirst({
             where: eq(episodes.id, id),
         });
@@ -58,7 +67,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
             id: t.Numeric()
         })
     })
-    .post("/episodes", async ({ body }: any) => {
+    .post("/episodes", async ({ body }) => {
         const [newEpisode] = await db.insert(episodes).values({
             ...body,
             status: body.status as EpisodeStatus | undefined,
@@ -75,7 +84,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
             publishDate: t.Optional(t.String()),
         })
     })
-    .put("/episodes/:id", async ({ params: { id }, body }: any) => {
+    .put("/episodes/:id", async ({ params: { id }, body }) => {
         const [updated] = await db.update(episodes)
             .set({
                 ...body,
@@ -100,7 +109,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
     })
 
     // --- Scripts ---
-    .get("/episodes/:id/script", async ({ params: { id } }: any) => {
+    .get("/episodes/:id/script", async ({ params: { id } }) => {
         const script = await db.query.scripts.findFirst({
             where: eq(scripts.episodeId, id),
             orderBy: desc(scripts.version)
@@ -111,7 +120,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
             id: t.Numeric()
         })
     })
-    .post("/episodes/:id/script", async ({ params: { id }, body }: any) => {
+    .post("/episodes/:id/script", async ({ params: { id }, body }) => {
         const existing = await db.query.scripts.findFirst({
             where: eq(scripts.episodeId, id)
         });
@@ -140,7 +149,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
     })
 
     // --- Production Tasks ---
-    .get("/episodes/:id/tasks", async ({ params: { id } }: any) => {
+    .get("/episodes/:id/tasks", async ({ params: { id } }) => {
         return await db.select().from(productionTasks)
             .where(eq(productionTasks.episodeId, id));
     }, {
@@ -148,7 +157,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
             id: t.Numeric()
         })
     })
-    .post("/episodes/:id/tasks", async ({ params: { id }, body }: any) => {
+    .post("/episodes/:id/tasks", async ({ params: { id }, body }) => {
         const [newTask] = await db.insert(productionTasks).values({
             episodeId: id,
             title: body.title,
@@ -167,7 +176,7 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
             id: t.Numeric()
         })
     })
-    .put("/tasks/:id", async ({ params: { id }, body }: any) => {
+    .put("/tasks/:id", async ({ params: { id }, body }) => {
         const [updated] = await db.update(productionTasks)
             .set({
                 status: body.status as TaskStatus | undefined,
@@ -183,3 +192,6 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
             id: t.Numeric()
         })
     });
+`;
+
+fs.writeFileSync('apps/api/src/modules/agenda/agenda.controller.ts', code);
