@@ -48,10 +48,13 @@ export const billingRoutes = new Elysia({ prefix: "/billing" })
                 ...body,
                 status: body.status as BillingStatus | undefined,
             })
-            .where(eq(billing.id, parseInt(id)))
+            .where(eq(billing.id, id))
             .returning();
         return updated;
     }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
         body: t.Object({
             clientName: t.Optional(t.String()),
             amount: t.Optional(t.Number()),
@@ -62,6 +65,10 @@ export const billingRoutes = new Elysia({ prefix: "/billing" })
         })
     })
     .delete("/:id", async ({ params: { id } }) => {
-        await db.delete(billing).where(eq(billing.id, parseInt(id)));
+        await db.delete(billing).where(eq(billing.id, id));
         return { success: true };
+    }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
     });

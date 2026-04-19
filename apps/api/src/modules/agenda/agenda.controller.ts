@@ -49,10 +49,14 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
     })
     .get("/episodes/:id", async ({ params: { id } }) => {
         const episode = await db.query.episodes.findFirst({
-            where: eq(episodes.id, parseInt(id)),
+            where: eq(episodes.id, id),
         });
         if (!episode) throw new Error("Episode not found");
         return episode;
+    }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
     })
     .post("/episodes", async ({ body }) => {
         const [newEpisode] = await db.insert(episodes).values({
@@ -78,10 +82,13 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
                 status: body.status as EpisodeStatus | undefined,
                 publishDate: body.publishDate ? new Date(body.publishDate) : undefined,
             })
-            .where(eq(episodes.id, parseInt(id)))
+            .where(eq(episodes.id, id))
             .returning();
         return updated;
     }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
         body: t.Object({
             title: t.Optional(t.String()),
             description: t.Optional(t.String()),
@@ -95,16 +102,20 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
     // --- Scripts ---
     .get("/episodes/:id/script", async ({ params: { id } }) => {
         const script = await db.query.scripts.findFirst({
-            where: eq(scripts.episodeId, parseInt(id)),
+            where: eq(scripts.episodeId, id),
             orderBy: desc(scripts.version)
         });
         return script || { content: "" };
+    }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
     })
     .post("/episodes/:id/script", async ({ params: { id }, body }) => {
         // Simple versioning: always create new or update existing?
         // For POC, let's update or create if not exists
         const existing = await db.query.scripts.findFirst({
-            where: eq(scripts.episodeId, parseInt(id))
+            where: eq(scripts.episodeId, id)
         });
 
         if (existing) {
@@ -115,13 +126,16 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
             return updated;
         } else {
             const [created] = await db.insert(scripts).values({
-                episodeId: parseInt(id),
+                episodeId: id,
                 content: body.content,
                 version: 1
             }).returning();
             return created;
         }
     }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
         body: t.Object({
             content: t.String(),
         })
@@ -130,11 +144,15 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
     // --- Production Tasks ---
     .get("/episodes/:id/tasks", async ({ params: { id } }) => {
         return await db.select().from(productionTasks)
-            .where(eq(productionTasks.episodeId, parseInt(id)));
+            .where(eq(productionTasks.episodeId, id));
+    }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
     })
     .post("/episodes/:id/tasks", async ({ params: { id }, body }) => {
         const [newTask] = await db.insert(productionTasks).values({
-            episodeId: parseInt(id),
+            episodeId: id,
             title: body.title,
             status: "TODO",
             assignee: body.assignee,
@@ -142,6 +160,9 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
         }).returning();
         return newTask;
     }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
         body: t.Object({
             title: t.String(),
             assignee: t.Optional(t.String()),
@@ -153,10 +174,13 @@ export const agendaRoutes = new Elysia({ prefix: "/agenda" })
             .set({
                 status: body.status as TaskStatus | undefined,
             })
-            .where(eq(productionTasks.id, parseInt(id)))
+            .where(eq(productionTasks.id, id))
             .returning();
         return updated;
     }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
         body: t.Object({
             status: t.String(),
         })
