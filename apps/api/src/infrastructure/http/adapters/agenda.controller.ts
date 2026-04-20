@@ -11,6 +11,9 @@ import { UpdateEventUseCase } from '@application/agenda/use-cases/update-event.u
 import { CancelEventUseCase } from '@application/agenda/use-cases/cancel-event.use-case';
 import { ListEventsUseCase } from '@application/agenda/use-cases/list-events.use-case';
 import { GetEventUseCase } from '@application/agenda/use-cases/get-event.use-case';
+import { CompleteEventUseCase } from '@application/agenda/use-cases/complete-event.use-case';
+import { AddAttendeeUseCase } from '@application/agenda/use-cases/add-attendee.use-case';
+import { RemoveAttendeeUseCase } from '@application/agenda/use-cases/remove-attendee.use-case';
 import { EventType, EventStatus } from '@domain/agenda/value-objects/event-status.enum';
 
 export class AgendaController {
@@ -21,7 +24,10 @@ export class AgendaController {
     private readonly updateEventUseCase: UpdateEventUseCase,
     private readonly cancelEventUseCase: CancelEventUseCase,
     private readonly listEventsUseCase: ListEventsUseCase,
-    private readonly getEventUseCase: GetEventUseCase
+    private readonly getEventUseCase: GetEventUseCase,
+    private readonly completeEventUseCase: CompleteEventUseCase,
+    private readonly addAttendeeUseCase: AddAttendeeUseCase,
+    private readonly removeAttendeeUseCase: RemoveAttendeeUseCase
   ) {
     this.routes = this.createRoutes();
   }
@@ -185,9 +191,7 @@ export class AgendaController {
       .post(
         '/events/:id/complete',
         async ({ params }) => {
-          const event = await this.getEventUseCase.execute(params.id);
-          event.markAsCompleted();
-          // Nota: precisaria de um use case específico ou repository.update
+          await this.completeEventUseCase.execute(params.id);
           return { success: true, message: 'Event marked as completed' };
         },
         {
@@ -201,9 +205,7 @@ export class AgendaController {
       .post(
         '/events/:id/attendees',
         async ({ params, body }) => {
-          const event = await this.getEventUseCase.execute(params.id);
-          event.addAttendee(body.userId);
-          // Nota: precisaria de repository.update
+          await this.addAttendeeUseCase.execute(params.id, body.userId);
           return { success: true, message: 'Attendee added successfully' };
         },
         {
@@ -220,9 +222,7 @@ export class AgendaController {
       .delete(
         '/events/:id/attendees/:userId',
         async ({ params }) => {
-          const event = await this.getEventUseCase.execute(params.id);
-          event.removeAttendee(params.userId);
-          // Nota: precisaria de repository.update
+          await this.removeAttendeeUseCase.execute(params.id, params.userId);
           return { success: true, message: 'Attendee removed successfully' };
         },
         {

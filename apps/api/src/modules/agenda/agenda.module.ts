@@ -12,6 +12,9 @@ import { UpdateEventUseCase } from '@application/agenda/use-cases/update-event.u
 import { CancelEventUseCase } from '@application/agenda/use-cases/cancel-event.use-case';
 import { ListEventsUseCase } from '@application/agenda/use-cases/list-events.use-case';
 import { GetEventUseCase } from '@application/agenda/use-cases/get-event.use-case';
+import { CompleteEventUseCase } from '@application/agenda/use-cases/complete-event.use-case';
+import { AddAttendeeUseCase } from '@application/agenda/use-cases/add-attendee.use-case';
+import { RemoveAttendeeUseCase } from '@application/agenda/use-cases/remove-attendee.use-case';
 
 /**
  * Cria e configura todas as dependências do módulo Agenda
@@ -26,6 +29,9 @@ export function createAgendaModule(): AgendaController {
   const cancelEventUseCase = new CancelEventUseCase(agendaRepository);
   const listEventsUseCase = new ListEventsUseCase(agendaRepository);
   const getEventUseCase = new GetEventUseCase(agendaRepository);
+  const completeEventUseCase = new CompleteEventUseCase(agendaRepository);
+  const addAttendeeUseCase = new AddAttendeeUseCase(agendaRepository);
+  const removeAttendeeUseCase = new RemoveAttendeeUseCase(agendaRepository);
 
   // Infrastructure layer (HTTP controller)
   const agendaController = new AgendaController(
@@ -33,7 +39,10 @@ export function createAgendaModule(): AgendaController {
     updateEventUseCase,
     cancelEventUseCase,
     listEventsUseCase,
-    getEventUseCase
+    getEventUseCase,
+    completeEventUseCase,
+    addAttendeeUseCase,
+    removeAttendeeUseCase
   );
 
   return agendaController;
