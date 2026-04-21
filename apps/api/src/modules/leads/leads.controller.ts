@@ -14,10 +14,14 @@ export const leadsRoutes = new Elysia({ prefix: "/leads" })
     })
     .get("/:id", async ({ params: { id } }) => {
         const lead = await db.query.leads.findFirst({
-            where: eq(leads.id, parseInt(id)),
+            where: eq(leads.id, id),
         });
         if (!lead) throw new Error("Lead not found");
         return lead;
+    }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
     })
     .post(
         "/",
@@ -55,11 +59,14 @@ export const leadsRoutes = new Elysia({ prefix: "/leads" })
                     role: body.role as Role | undefined,
                     status: body.status as LeadStatus | undefined,
                 })
-                .where(eq(leads.id, parseInt(id)))
+                .where(eq(leads.id, id))
                 .returning();
             return updatedLead;
         },
         {
+            params: t.Object({
+                id: t.Numeric(),
+            }),
             body: t.Object({
                 name: t.Optional(t.String()),
                 email: t.Optional(t.String()),
@@ -76,20 +83,28 @@ export const leadsRoutes = new Elysia({ prefix: "/leads" })
         }
     )
     .delete("/:id", async ({ params: { id } }) => {
-        await db.delete(leads).where(eq(leads.id, parseInt(id)));
+        await db.delete(leads).where(eq(leads.id, id));
         return { success: true };
+    }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
     })
     // Interactions
     .get("/:id/interactions", async ({ params: { id } }) => {
         return await db.select().from(leadInteractions)
-            .where(eq(leadInteractions.leadId, parseInt(id)))
+            .where(eq(leadInteractions.leadId, id))
             .orderBy(desc(leadInteractions.date));
+    }, {
+        params: t.Object({
+            id: t.Numeric(),
+        }),
     })
     .post(
         "/:id/interactions",
         async ({ params: { id }, body }) => {
             const [newInteraction] = await db.insert(leadInteractions).values({
-                leadId: parseInt(id),
+                leadId: id,
                 content: body.content,
                 type: body.type as LeadInteractionType | undefined,
                 date: new Date(),
@@ -98,11 +113,14 @@ export const leadsRoutes = new Elysia({ prefix: "/leads" })
             // Update lastContact in leads table
             await db.update(leads)
                 .set({ lastContact: new Date() })
-                .where(eq(leads.id, parseInt(id)));
+                .where(eq(leads.id, id));
 
             return newInteraction;
         },
         {
+            params: t.Object({
+                id: t.Numeric(),
+            }),
             body: t.Object({
                 content: t.String(),
                 type: t.Optional(t.String()),
