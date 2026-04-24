@@ -37,52 +37,49 @@ export class PostgresReportRepository implements IReportRepository {
   async getFinancialMetrics(filters: ReportFilters): Promise<FinancialMetrics> {
     const { start, end } = this.getDateRange(filters.period ?? TimePeriod.MONTH, filters.startDate, filters.endDate);
 
-    // Total revenue (INCOME)
-    const [revenueResult] = await db
-      .select({ value: sum(budget.amount) })
-      .from(budget)
-      .where(and(eq(budget.type, 'INCOME'), gte(budget.date, start.toISOString().split('T')[0]), lte(budget.date, end.toISOString().split('T')[0])));
-
-    // Total expenses (EXPENSE)
-    const [expensesResult] = await db
-      .select({ value: sum(budget.amount) })
-      .from(budget)
-      .where(and(eq(budget.type, 'EXPENSE'), gte(budget.date, start.toISOString().split('T')[0]), lte(budget.date, end.toISOString().split('T')[0])));
-
-    // Revenue by category
-    const revenueByCategoryResult = await db
-      .select({
-        category: budget.category,
-        amount: sum(budget.amount),
-      })
-      .from(budget)
-      .where(and(eq(budget.type, 'INCOME'), gte(budget.date, start.toISOString().split('T')[0])))
-      .groupBy(budget.category);
-
-    // Expenses by category
-    const expensesByCategoryResult = await db
-      .select({
-        category: budget.category,
-        amount: sum(budget.amount),
-      })
-      .from(budget)
-      .where(and(eq(budget.type, 'EXPENSE'), gte(budget.date, start.toISOString().split('T')[0])))
-      .groupBy(budget.category);
-
-    // Monthly trend (last 6 months)
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const monthlyTrendResult = await db
-      .select({
-        month: sql<string>`to_char(${budget.date}, 'YYYY-MM')`,
-        revenue: sql<number>`SUM(CASE WHEN ${budget.type} = 'INCOME' THEN ${budget.amount} ELSE 0 END)`,
-        expenses: sql<number>`SUM(CASE WHEN ${budget.type} = 'EXPENSE' THEN ${budget.amount} ELSE 0 END)`,
-      })
-      .from(budget)
-      .where(gte(budget.date, sixMonthsAgo.toISOString().split('T')[0]))
-      .groupBy(sql`to_char(${budget.date}, 'YYYY-MM')`)
-      .orderBy(sql`to_char(${budget.date}, 'YYYY-MM')`);
+    const startDateStr = start.toISOString().split('T')[0];
+    const endDateStr = end.toISOString().split('T')[0];
+    const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
+
+    const [
+      [revenueResult],
+      [expensesResult],
+      revenueByCategoryResult,
+      expensesByCategoryResult,
+      monthlyTrendResult
+    ] = await Promise.all([
+      db
+        .select({ value: sum(budget.amount) })
+        .from(budget)
+        .where(and(eq(budget.type, 'INCOME'), gte(budget.date, startDateStr), lte(budget.date, endDateStr))),
+      db
+        .select({ value: sum(budget.amount) })
+        .from(budget)
+        .where(and(eq(budget.type, 'EXPENSE'), gte(budget.date, startDateStr), lte(budget.date, endDateStr))),
+      db
+        .select({ category: budget.category, amount: sum(budget.amount) })
+        .from(budget)
+        .where(and(eq(budget.type, 'INCOME'), gte(budget.date, startDateStr)))
+        .groupBy(budget.category),
+      db
+        .select({ category: budget.category, amount: sum(budget.amount) })
+        .from(budget)
+        .where(and(eq(budget.type, 'EXPENSE'), gte(budget.date, startDateStr)))
+        .groupBy(budget.category),
+      db
+        .select({
+          month: sql<string>`to_char(${budget.date}, 'YYYY-MM')`,
+          revenue: sql<number>`SUM(CASE WHEN ${budget.type} = 'INCOME' THEN ${budget.amount} ELSE 0 END)`,
+          expenses: sql<number>`SUM(CASE WHEN ${budget.type} = 'EXPENSE' THEN ${budget.amount} ELSE 0 END)`,
+        })
+        .from(budget)
+        .where(gte(budget.date, sixMonthsAgoStr))
+        .groupBy(sql`to_char(${budget.date}, 'YYYY-MM')`)
+        .orderBy(sql`to_char(${budget.date}, 'YYYY-MM')`)
+    ]);
 
     const totalRevenue = Number(revenueResult?.value ?? 0);
     const totalExpenses = Number(expensesResult?.value ?? 0);
@@ -113,38 +110,35 @@ export class PostgresReportRepository implements IReportRepository {
   async getEpisodeMetrics(filters: ReportFilters): Promise<EpisodeMetrics> {
     const { start, end } = this.getDateRange(filters.period ?? TimePeriod.MONTH, filters.startDate, filters.endDate);
 
-    // Total episodes
-    const [totalResult] = await db.select({ value: count() }).from(episodes);
-
-    // Episodes by status
-    const byStatusResult = await db
-      .select({
-        status: episodes.status,
-        count: count(),
-      })
-      .from(episodes)
-      .groupBy(episodes.status);
-
-    // Recent episodes
-    const recentEpisodes = await db
-      .select({
-        id: episodes.id,
-        title: episodes.title,
-        status: episodes.status,
-        createdAt: episodes.createdAt,
-      })
-      .from(episodes)
-      .orderBy(desc(episodes.createdAt))
-      .limit(filters.limit ?? 5);
-
-    // Average episodes per month
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const [sixMonthCount] = await db
-      .select({ value: count() })
-      .from(episodes)
-      .where(gte(episodes.createdAt, sixMonthsAgo));
+    const [
+      [totalResult],
+      byStatusResult,
+      recentEpisodes,
+      [sixMonthCount]
+    ] = await Promise.all([
+      db.select({ value: count() }).from(episodes),
+      db
+        .select({ status: episodes.status, count: count() })
+        .from(episodes)
+        .groupBy(episodes.status),
+      db
+        .select({
+          id: episodes.id,
+          title: episodes.title,
+          status: episodes.status,
+          createdAt: episodes.createdAt,
+        })
+        .from(episodes)
+        .orderBy(desc(episodes.createdAt))
+        .limit(filters.limit ?? 5),
+      db
+        .select({ value: count() })
+        .from(episodes)
+        .where(gte(episodes.createdAt, sixMonthsAgo))
+    ]);
 
     const totalEpisodes = Number(totalResult?.value ?? 0);
     const avgPerMonth = totalEpisodes > 0 ? Math.round(totalEpisodes / 6) : 0;
@@ -171,45 +165,38 @@ export class PostgresReportRepository implements IReportRepository {
   async getLeadMetrics(filters: ReportFilters): Promise<LeadMetrics> {
     const { start, end } = this.getDateRange(filters.period ?? TimePeriod.MONTH, filters.startDate, filters.endDate);
 
-    // Total leads
-    const [totalResult] = await db.select({ value: count() }).from(leads);
-
-    // Leads by status
-    const byStatusResult = await db
-      .select({
-        status: leads.status,
-        count: count(),
-      })
-      .from(leads)
-      .groupBy(leads.status);
-
-    // Leads by source
-    const bySourceResult = await db
-      .select({
-        source: leads.source,
-        count: count(),
-      })
-      .from(leads)
-      .groupBy(leads.source);
-
-    // Recent leads
-    const recentLeads = await db
-      .select({
-        id: leads.id,
-        name: leads.name,
-        email: leads.email,
-        status: leads.status,
-        createdAt: leads.createdAt,
-      })
-      .from(leads)
-      .orderBy(desc(leads.createdAt))
-      .limit(filters.limit ?? 5);
-
-    // Conversion rate (RECORDED / total)
-    const [recordedCount] = await db
-      .select({ value: count() })
-      .from(leads)
-      .where(eq(leads.status, 'RECORDED'));
+    const [
+      [totalResult],
+      byStatusResult,
+      bySourceResult,
+      recentLeads,
+      [recordedCount]
+    ] = await Promise.all([
+      db.select({ value: count() }).from(leads),
+      db
+        .select({ status: leads.status, count: count() })
+        .from(leads)
+        .groupBy(leads.status),
+      db
+        .select({ source: leads.source, count: count() })
+        .from(leads)
+        .groupBy(leads.source),
+      db
+        .select({
+          id: leads.id,
+          name: leads.name,
+          email: leads.email,
+          status: leads.status,
+          createdAt: leads.createdAt,
+        })
+        .from(leads)
+        .orderBy(desc(leads.createdAt))
+        .limit(filters.limit ?? 5),
+      db
+        .select({ value: count() })
+        .from(leads)
+        .where(eq(leads.status, 'RECORDED'))
+    ]);
 
     const totalLeads = Number(totalResult?.value ?? 0);
     const recordedLeads = Number(recordedCount?.value ?? 0);
@@ -243,35 +230,29 @@ export class PostgresReportRepository implements IReportRepository {
     const { start, end } = this.getDateRange(filters.period ?? TimePeriod.MONTH, filters.startDate, filters.endDate);
     const now = new Date();
 
-    // Total events
-    const [totalResult] = await db.select({ value: count() }).from(agenda);
-
-    // Upcoming events (next 7 days)
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 7);
 
-    const [upcomingResult] = await db
-      .select({ value: count() })
-      .from(agenda)
-      .where(and(gte(agenda.startDate, now), lte(agenda.startDate, nextWeek)));
-
-    // Events by type
-    const byTypeResult = await db
-      .select({
-        type: agenda.type,
-        count: count(),
-      })
-      .from(agenda)
-      .groupBy(agenda.type);
-
-    // Events by status
-    const byStatusResult = await db
-      .select({
-        status: agenda.status,
-        count: count(),
-      })
-      .from(agenda)
-      .groupBy(agenda.status);
+    const [
+      [totalResult],
+      [upcomingResult],
+      byTypeResult,
+      byStatusResult
+    ] = await Promise.all([
+      db.select({ value: count() }).from(agenda),
+      db
+        .select({ value: count() })
+        .from(agenda)
+        .where(and(gte(agenda.startDate, now), lte(agenda.startDate, nextWeek))),
+      db
+        .select({ type: agenda.type, count: count() })
+        .from(agenda)
+        .groupBy(agenda.type),
+      db
+        .select({ status: agenda.status, count: count() })
+        .from(agenda)
+        .groupBy(agenda.status)
+    ]);
 
     return {
       totalEvents: Number(totalResult?.value ?? 0),
@@ -294,39 +275,37 @@ export class PostgresReportRepository implements IReportRepository {
     const { start, end } = this.getDateRange(filters?.period ?? TimePeriod.MONTH, filters?.startDate, filters?.endDate);
     const startDateStr = start.toISOString().split('T')[0];
 
-    // 1. Total Leads
-    const [leadsResult] = await db.select({ value: count() }).from(leads);
-
-    // 2. Active Episodes (not PUBLISHED)
-    const [activeEpisodesResult] = await db
-      .select({ value: count() })
-      .from(episodes)
-      .where(sql`${episodes.status} != 'PUBLISHED'`);
-
-    // 3. Monthly Revenue (INCOME for current period)
-    const [revenueResult] = await db
-      .select({ value: sum(budget.amount) })
-      .from(budget)
-      .where(and(eq(budget.type, 'INCOME'), gte(budget.date, startDateStr)));
-
-    // 4. Upcoming Events (next 7 days)
     const now = new Date();
     const nextWeek = new Date();
     nextWeek.setDate(nextWeek.getDate() + 7);
 
-    const [upcomingEventsResult] = await db
-      .select({ value: count() })
-      .from(agenda)
-      .where(and(gte(agenda.startDate, now), lte(agenda.startDate, nextWeek)));
-
-    // 5. Total Invoices
-    const [invoicesResult] = await db.select({ value: count() }).from(billing);
-
-    // 6. Pending Payments
-    const [pendingPaymentsResult] = await db
-      .select({ value: count() })
-      .from(payments)
-      .where(eq(payments.status, PaymentStatus.PENDING));
+    const [
+      [leadsResult],
+      [activeEpisodesResult],
+      [revenueResult],
+      [upcomingEventsResult],
+      [invoicesResult],
+      [pendingPaymentsResult]
+    ] = await Promise.all([
+      db.select({ value: count() }).from(leads),
+      db
+        .select({ value: count() })
+        .from(episodes)
+        .where(sql`${episodes.status} != 'PUBLISHED'`),
+      db
+        .select({ value: sum(budget.amount) })
+        .from(budget)
+        .where(and(eq(budget.type, 'INCOME'), gte(budget.date, startDateStr))),
+      db
+        .select({ value: count() })
+        .from(agenda)
+        .where(and(gte(agenda.startDate, now), lte(agenda.startDate, nextWeek))),
+      db.select({ value: count() }).from(billing),
+      db
+        .select({ value: count() })
+        .from(payments)
+        .where(eq(payments.status, PaymentStatus.PENDING))
+    ]);
 
     return {
       totalLeads: Number(leadsResult?.value ?? 0),
