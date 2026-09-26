@@ -70,3 +70,15 @@ docker compose up
 
 Proof of concept. The four domains above are implemented at the level needed
 to validate the workflow; billing in particular is not yet production-ready.
+
+### Known debt
+
+The two applications are not in the same state, and CI reflects that honestly:
+
+| | State |
+|---|---|
+| `apps/web` | 101 tests passing, builds clean |
+| `apps/api` | Tests run, but 36 of 335 fail; `tsc` reports ~298 errors, mostly `noImplicitAny` on untyped Elysia/Drizzle generics. The `whitelabel` module has broken relative imports and two missing files. |
+
+`apps/api` typecheck therefore runs in CI as a **non-blocking** job — visible,
+but not failing the build. The `web` suite is the gate.
