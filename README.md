@@ -1,5 +1,8 @@
 # Podcast SaaS — Proof of Concept
 
+[![CI](https://github.com/matheus-amon/podcast/actions/workflows/ci.yml/badge.svg)](https://github.com/matheus-amon/podcast/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 A proof-of-concept SaaS for podcast operations, covering the four domains that
 actually block a small studio: **agenda**, **leads**, **budget** and **billing**.
 
