@@ -1,15 +1,27 @@
-# Podcast SaaS POC
+# Podcast SaaS — Proof of Concept
 
-Este projeto contém a POC (Prova de Conceito) para o SaaS de Gestão de Podcasts, focando nas funcionalidades de Agenda, Leads, Budget e Billing.
+A proof-of-concept SaaS for podcast operations, covering the four domains that
+actually block a small studio: **agenda**, **leads**, **budget** and **billing**.
 
-## Estrutura
+The project is spec-driven: requirements and behaviour are written down under
+[`specs/`](specs/) before they are implemented, and the implementation is
+checked back against them.
 
-- `apps/api`: Backend Bun + ElysiaJS + Drizzle.
-- `apps/web`: Frontend Next.js + Shadcn/UI.
+## Structure
 
-## Como Rodar
+A monorepo with two applications:
 
-### 1. Backend
+| Path | Stack | Role |
+|---|---|---|
+| `apps/api` | Bun · ElysiaJS · Drizzle | Backend, REST API, Postgres access |
+| `apps/web` | Next.js · shadcn/ui · Tailwind | Frontend |
+
+Supporting directories: [`specs/`](specs/) for specifications,
+[`docs/`](docs/) for documentation.
+
+## Running locally
+
+### Backend
 
 ```bash
 cd apps/api
@@ -17,18 +29,18 @@ bun install
 bun run src/index.ts
 ```
 
-O servidor estará rodando em `http://localhost:3001`.
-Acesse o Swagger em `http://localhost:3001/swagger`.
+Serves on `http://localhost:3001`. Swagger UI at
+`http://localhost:3001/swagger`.
 
-**Nota:** Certifique-se de ter um banco de dados PostgreSQL rodando. Configure a URL em `apps/api/.env`.
-Para aplicar as migrações (criar tabelas):
+Requires a running PostgreSQL instance — set the connection string in
+`apps/api/.env`. To create the schema:
 
 ```bash
 cd apps/api
 bun x drizzle-kit push
 ```
 
-### 2. Frontend
+### Frontend
 
 ```bash
 cd apps/web
@@ -36,11 +48,22 @@ bun install
 bun run dev
 ```
 
-Acesse a aplicação em `http://localhost:3000`.
+Available at `http://localhost:3000`.
 
-## Funcionalidades
+Alternatively bring up the whole stack at once:
 
-- **Agenda:** `apps/web/app/agenda`
-- **Leads:** `apps/web/app/leads`
-- **Finance:** `apps/web/app/finance` (Budget & Billing)
-- **Settings:** `apps/web/app/settings` (Whitelabel)
+```bash
+docker compose up
+```
+
+## Features
+
+- **Agenda** — `apps/web/app/agenda` — episode and recording scheduling
+- **Leads** — `apps/web/app/leads` — pipeline of contacts and opportunities
+- **Finance** — `apps/web/app/finance` — budget tracking and billing
+- **Settings** — `apps/web/app/settings` — whitelabelling
+
+## Status
+
+Proof of concept. The four domains above are implemented at the level needed
+to validate the workflow; billing in particular is not yet production-ready.
