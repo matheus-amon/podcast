@@ -9,43 +9,43 @@ import { BaseEntity } from '../../../../src/domain/common/entities/base.entity';
 
 // Classe concreta para testes
 class TestEntity extends BaseEntity<any> {
-  public props: any;
+  public override props: any;
   
   constructor(props: any) {
     super(props);
     this.props = props;
   }
 
-  toObject(): any {
+  override toObject(): any {
     return { ...this.props };
   }
   
   // Expor métodos protegidos para teste
-  delete(): void {
+  override delete(): void {
     super.delete();
   }
   
-  touch(): void {
+  override touch(): void {
     super.touch();
   }
   
-  get deletedAt() {
+  override get deletedAt() {
     return super.deletedAt;
   }
   
-  get updatedAt() {
+  override get updatedAt() {
     return super.updatedAt;
   }
   
-  get id() {
+  override get id() {
     return super.id;
   }
   
-  get createdAt() {
+  override get createdAt() {
     return super.createdAt;
   }
   
-  isDeleted(): boolean {
+  override isDeleted(): boolean {
     return super.isDeleted();
   }
 }

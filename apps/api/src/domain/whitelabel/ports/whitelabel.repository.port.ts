@@ -4,7 +4,7 @@
  * Interface que define o contrato para repositórios de WhitelabelConfig
  */
 
-import { WhitelabelConfig, CreateWhitelabelConfigProps } from '../entities/whitelabel-config.entity';
+import { WhitelabelConfig, type CreateWhitelabelConfigProps } from '../entities/whitelabel-config.entity';
 
 export interface IWhitelabelRepository {
   /**

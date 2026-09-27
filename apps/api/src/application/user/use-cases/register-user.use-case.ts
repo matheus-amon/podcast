@@ -5,7 +5,7 @@
  */
 
 import { User } from '../../../domain/user/entities/user.entity';
-import { IUserRepository } from '../../../domain/user/ports/user-repository.port';
+import type { IUserRepository } from '../../../domain/user/ports/user-repository.port';
 import { signAccessToken, signRefreshToken } from '../../../lib/jwt';
 
 export interface RegisterUserDTO {

@@ -5,7 +5,7 @@
  */
 
 import { User } from '../../../domain/user/entities/user.entity';
-import { IUserRepository } from '../../../domain/user/ports/user-repository.port';
+import type { IUserRepository } from '../../../domain/user/ports/user-repository.port';
 import { signAccessToken, signRefreshToken } from '../../../lib/jwt';
 import { comparePassword } from '../../../lib/password';
 import { Email } from '../../../domain/user/value-objects/email.vo';

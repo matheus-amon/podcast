@@ -6,8 +6,8 @@
  */
 
 import { AgendaEvent } from '../entities/agenda-event.entity';
-import { CreateAgendaEventDTO } from '../entities/agenda-event.entity';
-import { DateRange } from './agenda-repository.port';
+import type { CreateAgendaEventDTO } from '../entities/agenda-event.entity';
+import type { DateRange } from './agenda-repository.port';
 
 export interface CreateEventDTO {
   title: string;

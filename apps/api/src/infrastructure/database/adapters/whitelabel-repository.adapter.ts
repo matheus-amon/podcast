@@ -6,7 +6,7 @@
  */
 
 import { WhitelabelConfig } from '@domain/whitelabel/entities/whitelabel-config.entity';
-import { IWhitelabelRepository } from '@domain/whitelabel/ports/whitelabel.repository.port';
+import type { IWhitelabelRepository } from '@domain/whitelabel/ports/whitelabel.repository.port';
 import { db } from '@db/index';
 import { whitelabelConfig } from '@db/schema';
 import { eq } from 'drizzle-orm';

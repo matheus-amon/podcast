@@ -5,7 +5,7 @@
  */
 
 import { WhitelabelConfig, type CreateWhitelabelConfigProps } from '@domain/whitelabel/entities/whitelabel-config.entity';
-import { IWhitelabelRepository } from '@domain/whitelabel/ports/whitelabel.repository.port';
+import type { IWhitelabelRepository } from '@domain/whitelabel/ports/whitelabel.repository.port';
 
 export interface UpdateWhitelabelConfigInput extends CreateWhitelabelConfigProps {}
 

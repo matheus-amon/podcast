@@ -28,7 +28,7 @@ export function mockDate(date: string | Date): void {
     constructor(...args: any[]) {
       super(date);
     }
-    static now() {
+    static override now() {
       return new Date(date).getTime();
     }
   } as any;
