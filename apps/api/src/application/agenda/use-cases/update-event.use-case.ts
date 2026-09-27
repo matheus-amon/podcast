@@ -57,13 +57,11 @@ export class UpdateEventUseCase {
       if (!this.isValidEventType(props.type)) {
         throw new Error('Invalid event type');
       }
-      existingEvent.props.type = props.type;
-      existingEvent.touch();
+      existingEvent.updateType(props.type);
     }
 
     if (props.color !== undefined) {
-      existingEvent.props.color = props.color;
-      existingEvent.touch();
+      existingEvent.updateColor(props.color);
     }
 
     // Persistir atualizações

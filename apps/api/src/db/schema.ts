@@ -250,6 +250,7 @@ export const whitelabelConfig = pgTable('whitelabel_config', {
     secondaryColor: text('secondary_color').default('#1E40AF'),
     companyName: text('company_name').default('Podcast SaaS'),
     subdomain: text('subdomain'),
+    createdAt: timestamp('created_at').defaultNow(),
     updatedAt: timestamp('updated_at').defaultNow(),
 });
 

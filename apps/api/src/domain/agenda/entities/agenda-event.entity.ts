@@ -150,6 +150,22 @@ export class AgendaEvent extends BaseEntity<AgendaEventProps> {
   }
 
   /**
+   * Atualiza o tipo do evento
+   */
+  updateType(type: EventType): void {
+    this.props.type = type;
+    this.touch();
+  }
+
+  /**
+   * Atualiza a cor do evento
+   */
+  updateColor(color: string): void {
+    this.props.color = color;
+    this.touch();
+  }
+
+  /**
    * Cancela o evento
    */
   cancel(reason: string): void {

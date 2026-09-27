@@ -39,6 +39,10 @@ export class PostgresRefreshTokenRepository implements IRefreshTokenRepository {
       })
       .returning();
 
+    if (!created) {
+      throw new Error('Refresh token insert returned no row');
+    }
+
     return this.mapToDomain(created);
   }
 

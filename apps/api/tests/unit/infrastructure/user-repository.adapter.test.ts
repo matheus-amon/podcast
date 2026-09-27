@@ -16,7 +16,9 @@ describe('PostgresUserRepository', () => {
   beforeEach(async () => {
     repository = new PostgresUserRepository();
     // Clean up before each test
-    await db.delete(users).where();
+    // Truncate: drizzle's delete() requires a predicate, so omitting
+    // .where() is how 'delete every row' is expressed.
+    await db.delete(users);
   });
 
   describe('create', () => {

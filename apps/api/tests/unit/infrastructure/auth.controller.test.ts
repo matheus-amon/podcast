@@ -6,7 +6,6 @@
 
 import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { AuthController } from '../../../src/infrastructure/http/adapters/auth.controller';
-import type { RegisterUserUseCase } from '../../../src/application/user/use-cases/register-user.use-case';
 
 describe('AuthController', () => {
   let mockRegisterUseCase: any;
@@ -28,7 +27,17 @@ describe('AuthController', () => {
       })),
     };
 
-    controller = new AuthController(mockRegisterUseCase);
+    // The controller takes all four use cases. Only register is exercised
+    // here, but the other three have to be supplied for the constructor call
+    // to be valid. Typed as any to match the mock above.
+    const unusedUseCase: any = { execute: mock(() => Promise.resolve(undefined)) };
+
+    controller = new AuthController(
+      mockRegisterUseCase,
+      unusedUseCase,
+      unusedUseCase,
+      unusedUseCase,
+    );
   });
 
   describe('POST /auth/register', () => {

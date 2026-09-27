@@ -454,7 +454,14 @@ describe('AgendaEvent', () => {
       expect(obj).toBeDefined();
       expect(obj.id).toBe(event.id);
       expect(obj.title).toBe(event.title);
-      expect(obj).not.toBe(event.props);
+
+      // Asserts the actual guarantee -- toObject hands back a copy -- by
+      // mutating the result and checking the entity is untouched. Comparing
+      // against the internal props object would mean reaching into a
+      // protected member from outside the class.
+      const originalTitle = event.title;
+      obj.title = 'mutated outside';
+      expect(event.title).toBe(originalTitle);
     });
   });
 });
