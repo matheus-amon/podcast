@@ -78,7 +78,15 @@ The two applications are not in the same state, and CI reflects that honestly:
 | | State |
 |---|---|
 | `apps/web` | 101 tests passing, builds clean |
-| `apps/api` | Tests run, but 36 of 335 fail; `tsc` reports ~298 errors, mostly `noImplicitAny` on untyped Elysia/Drizzle generics. The `whitelabel` module has broken relative imports and two missing files. |
+| `apps/api` | `tsc --noEmit` clean, enforced in CI. 41 of 345 tests fail, all of them e2e cases that need a running server and a seeded database |
 
-`apps/api` typecheck therefore runs in CI as a **non-blocking** job — visible,
-but not failing the build. The `web` suite is the gate.
+`apps/api` typechecking is a **blocking** CI job, and the same assertion runs
+in `apps/api/tests/compilation.test.ts`.
+
+The 286 type errors it used to report were not 286 pieces of debt. A single
+`let db;` in `apps/api/src/db/index.ts` had no type and no initializer, which
+under `noImplicitAny` made every Drizzle call in every repository adapter
+`any` — and checking an `any` finds nothing. Fixing that one declaration took
+the count to 107 and surfaced the defects the `any` had been hiding: imports of
+schema symbols that do not exist, two missing imports, and an auth guard whose
+context was never populated.

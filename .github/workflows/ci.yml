@@ -12,12 +12,12 @@ concurrency:
 
 jobs:
   api:
-    # The API has outstanding type debt (~298 tsc errors, mostly noImplicitAny
-    # on untyped Elysia/Drizzle generics) and a broken whitelabel module.
-    # Reported, but not blocking, until that debt is paid down.
-    # Tracked in Linear; see the "known debt" note in apps/api/README.md.
-    name: API (typecheck - known debt, non-blocking)
-    continue-on-error: true
+    # The type debt this job used to report is paid: 286 -> 0. It was mostly
+    # not missing annotations but one untyped `let db` that made every
+    # repository adapter `any` and switched off checking for 179 errors.
+    # Blocking now so it stays that way. Same gate as
+    # apps/api/tests/compilation.test.ts, just at the push.
+    name: API (typecheck)
     runs-on: ubuntu-latest
     defaults:
       run:
