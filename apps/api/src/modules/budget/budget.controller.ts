@@ -91,6 +91,11 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
             name: body.name,
             items: body.items,
         }).returning();
+
+        if (!newTemplate) {
+            throw new Error('Template insert returned no row');
+        }
+
         return newTemplate;
     }, {
         body: t.Object({
@@ -98,7 +103,10 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
             items: t.Array(t.Object({
                 concept: t.String(),
                 amount: t.Number(),
-                type: t.String(), // INCOME | EXPENSE
+                // Was t.String() with a comment naming the two valid values.
+                // The items column is JSON, so the database does not check
+                // them -- a union makes the constraint real at the edge.
+                type: t.Union([t.Literal('INCOME'), t.Literal('EXPENSE')]),
                 category: t.String(),
             }))
         })

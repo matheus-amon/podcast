@@ -259,7 +259,11 @@ export class PostgresPaymentRepository implements IPaymentRepository {
     }
 
     if (filters?.method) {
-      conditions.push(eq(payments.method, filters.method));
+      // The column is a pgEnum, so Drizzle infers its type as a string literal
+      // union; the domain models it as a TS enum. Same values, and TS will not
+      // convert between the two representations implicitly.
+      const method = filters.method as typeof payments.method.enumValues[number];
+      conditions.push(eq(payments.method, method));
     }
 
     if (filters?.dateFrom) {

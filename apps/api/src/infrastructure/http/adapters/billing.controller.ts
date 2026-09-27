@@ -283,7 +283,10 @@ export class BillingController {
         {
           body: t.Object({
             invoiceId: t.String(),
-            amount: t.Optional(t.Number()),
+            // Was t.Optional, but CreatePaymentDTO.amount is required and a
+            // payment with no amount is meaningless -- omitting it previously
+            // pushed undefined into the domain.
+            amount: t.Number(),
             method: t.Enum(PaymentMethod),
             transactionId: t.Optional(t.String()),
             autoApprove: t.Optional(t.Boolean()),

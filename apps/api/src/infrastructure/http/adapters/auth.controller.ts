@@ -153,9 +153,13 @@ export class AuthController {
             const authHeader = headers['authorization'];
             let refreshToken = authHeader?.replace('Bearer ', '') || '';
             
-            // Also check cookie
+            // Also check cookie. Elysia types an undeclared cookie name as
+            // unknown, so the value is narrowed before use.
             if (!refreshToken && cookie?.refreshToken) {
-              refreshToken = cookie.refreshToken.value;
+              const cookieValue = cookie.refreshToken.value;
+              if (typeof cookieValue === 'string') {
+                refreshToken = cookieValue;
+              }
             }
 
             if (!refreshToken) {

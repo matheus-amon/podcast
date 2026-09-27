@@ -318,7 +318,10 @@ describe('User Entity', () => {
       expect(obj.email).toBe(user.email);
       expect(obj.name).toBe(user.name);
       expect(obj.isActive).toBe(user.isActive);
-      expect(obj.passwordHash).toBeUndefined();
+      // toObject() is typed Omit<UserProps, 'passwordHash'>, so reading the
+      // property is a type error by design. Assert the key is absent instead,
+      // which is the guarantee that actually matters: the hash must not leak.
+      expect('passwordHash' in obj).toBe(false);
     });
   });
 });

@@ -6,6 +6,7 @@
 
 import type { Payment } from '../entities/payment.entity';
 import { PaymentStatus } from '../value-objects/payment-status.enum';
+import { PaymentMethod } from '../value-objects/payment-method.enum';
 
 /**
  * Filtros para busca de payments
@@ -13,7 +14,8 @@ import { PaymentStatus } from '../value-objects/payment-status.enum';
 export interface PaymentFilters {
   status?: PaymentStatus;
   invoiceId?: string;
-  method?: string;
+  /** Typed as the enum rather than `string`; every caller already narrows it. */
+  method?: PaymentMethod;
   dateFrom?: Date;
   dateTo?: Date;
   offset?: number;

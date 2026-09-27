@@ -8,6 +8,11 @@ import { describe, it, expect } from 'bun:test';
 import { execSync } from 'child_process';
 
 describe('TypeScript Compilation', () => {
+  // These shell out to tsc, which type-checks the whole project and takes
+  // ~9s here. Bun's default per-test timeout is 5s, so both were timing out
+  // regardless of whether the type check passed.
+  const TYPECHECK_TIMEOUT_MS = 60_000;
+
   it('should compile without errors', () => {
     try {
       // Executar typecheck
@@ -24,7 +29,7 @@ describe('TypeScript Compilation', () => {
       const stderr = error.stderr?.toString() || error.message;
       throw new Error(`TypeScript compilation failed:\n${stderr}`);
     }
-  });
+  }, TYPECHECK_TIMEOUT_MS);
 
   it('should have zero implicit any types', () => {
     try {
@@ -47,5 +52,5 @@ describe('TypeScript Compilation', () => {
       // Outros erros de typecheck
       throw new Error(`TypeScript strict check failed:\n${stderr}`);
     }
-  });
+  }, TYPECHECK_TIMEOUT_MS);
 });

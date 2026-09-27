@@ -62,7 +62,15 @@ function mapDbTemplateToDomain(dbTemplate: DbBudgetTemplate): BudgetTemplate {
   return BudgetTemplate.fromProps({
     id: dbTemplate.id.toString(),
     name: dbTemplate.name,
-    items: dbTemplate.items ?? [],
+    items: (dbTemplate.items ?? []).map((item) => ({
+      ...item,
+      // The items column is JSON, so Drizzle infers `type` as a string
+      // literal union while the domain uses a TS enum. TypeScript treats
+      // enums nominally, so neither direction is assignable without an
+      // explicit conversion. The values are identical, so this widens
+      // rather than reinterprets.
+      type: item.type as BudgetType,
+    })),
     createdAt: dbTemplate.createdAt ? new Date(dbTemplate.createdAt) : new Date(),
     updatedAt: dbTemplate.updatedAt ? new Date(dbTemplate.updatedAt) : new Date(),
   });

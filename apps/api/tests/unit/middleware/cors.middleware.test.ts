@@ -3,12 +3,18 @@ import { Elysia } from "elysia";
 import { corsMiddleware } from "../../../src/middleware/cors.middleware";
 
 describe("CORS Middleware", () => {
-  let app: Elysia;
+  // Built through a factory so the type is inferred. Annotating the variable
+  // as bare `Elysia` makes the composed app unassignable to it, because a
+  // plugin's onStart signature differs from the base one.
+  const buildApp = () =>
+    new Elysia().use(corsMiddleware()).get("/", () => "Hello World");
+
+  let app: ReturnType<typeof buildApp>;
   const originalEnv = process.env.ALLOWED_ORIGINS;
 
   beforeEach(() => {
     delete process.env.ALLOWED_ORIGINS;
-    app = new Elysia().use(corsMiddleware()).get("/", () => "Hello World");
+    app = buildApp();
   });
 
   afterEach(() => {
