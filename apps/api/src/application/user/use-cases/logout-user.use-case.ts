@@ -4,7 +4,7 @@
  * Handle user logout
  */
 
-import { IRefreshTokenRepository } from '../../domain/user/ports/refresh-token-repository.port';
+import type { IRefreshTokenRepository } from '@domain/user/ports/refresh-token-repository.port';
 
 export interface LogoutUserDTO {
   userId: string;
