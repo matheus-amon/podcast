@@ -6,6 +6,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import type { HttpRoutes } from '../../../types/http';
 import { GenerateInvoiceUseCase } from '@application/billing/use-cases/generate-invoice.use-case';
 import { UpdateInvoiceUseCase } from '@application/billing/use-cases/update-invoice.use-case';
 import { CancelInvoiceUseCase } from '@application/billing/use-cases/cancel-invoice.use-case';
@@ -22,7 +23,7 @@ import { PaymentMethod } from '@domain/billing/value-objects/payment-method.enum
 import { PaymentStatus } from '@domain/billing/value-objects/payment-status.enum';
 
 export class BillingController {
-  public routes: Elysia;
+  public routes: HttpRoutes;
 
   constructor(
     private readonly generateInvoiceUseCase: GenerateInvoiceUseCase,
@@ -43,7 +44,7 @@ export class BillingController {
   /**
    * Cria as rotas do controller
    */
-  private createRoutes(): Elysia {
+  private createRoutes(): HttpRoutes {
     return new Elysia({ prefix: '/billing' })
       // ==================== INVOICES ====================
       

@@ -6,6 +6,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import type { HttpRoutes } from '../../../types/http';
 import { CreateEventUseCase } from '@application/agenda/use-cases/create-event.use-case';
 import { UpdateEventUseCase } from '@application/agenda/use-cases/update-event.use-case';
 import { CancelEventUseCase } from '@application/agenda/use-cases/cancel-event.use-case';
@@ -18,7 +19,7 @@ import { EventType, EventStatus } from '@domain/agenda/value-objects/event-statu
 import { AgendaEvent } from '@domain/agenda/entities/agenda-event.entity';
 
 export class AgendaController {
-  public routes: Elysia;
+  public routes: HttpRoutes;
 
   constructor(
     private readonly createEventUseCase: CreateEventUseCase,
@@ -36,7 +37,7 @@ export class AgendaController {
   /**
    * Cria as rotas do controller
    */
-  private createRoutes(): Elysia {
+  private createRoutes(): HttpRoutes {
     return new Elysia({ prefix: '/agenda' })
       // GET /agenda/events - Listar todos os eventos
       .get(

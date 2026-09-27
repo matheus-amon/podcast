@@ -6,6 +6,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import type { HttpRoutes } from '../../../types/http';
 import { GetDashboardMetricsUseCase } from '@application/report/use-cases/get-dashboard-metrics.use-case';
 import { GetFinancialReportUseCase } from '@application/report/use-cases/get-financial-report.use-case';
 import { GetEpisodeReportUseCase } from '@application/report/use-cases/get-episode-report.use-case';
@@ -15,7 +16,7 @@ import { GetRecentActivityUseCase } from '@application/report/use-cases/get-rece
 import { TimePeriod } from '@domain/report/value-objects/time-period.enum';
 
 export class ReportController {
-  public routes: Elysia;
+  public routes: HttpRoutes;
 
   constructor(
     private readonly getDashboardMetricsUseCase: GetDashboardMetricsUseCase,
@@ -31,7 +32,7 @@ export class ReportController {
   /**
    * Cria as rotas do controller
    */
-  private createRoutes(): Elysia {
+  private createRoutes(): HttpRoutes {
     return new Elysia({ prefix: '/reports' })
       // GET /reports/dashboard - Métricas do dashboard
       .get(

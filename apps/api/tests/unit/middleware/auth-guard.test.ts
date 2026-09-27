@@ -32,13 +32,27 @@ const USER = {
 
 const url = 'http://localhost/me';
 
+interface ErrorBody {
+  error: { code: string; message: string };
+}
+
+interface MeBody {
+  user?: { userId: string; email: string };
+  error?: { code: string };
+}
+
+/** Response.json() is typed as `unknown`; these tests assert on its shape. */
+async function body<T>(res: Response): Promise<T> {
+  return (await res.json()) as T;
+}
+
 describe('authGuardMiddleware', () => {
   describe('rejection', () => {
     it('returns 401 TOKEN_MISSING when there is no Authorization header', async () => {
       const res = await buildApp().handle(new Request(url));
 
       expect(res.status).toBe(401);
-      expect(await res.json()).toEqual({
+      expect(await body<ErrorBody>(res)).toEqual({
         error: { code: 'TOKEN_MISSING', message: 'Authentication required' },
       });
     });
@@ -49,7 +63,7 @@ describe('authGuardMiddleware', () => {
       );
 
       expect(res.status).toBe(401);
-      expect((await res.json()).error.code).toBe('TOKEN_MISSING');
+      expect((await body<ErrorBody>(res)).error.code).toBe('TOKEN_MISSING');
     });
 
     it('returns 401 TOKEN_INVALID for a malformed token', async () => {
@@ -58,7 +72,7 @@ describe('authGuardMiddleware', () => {
       );
 
       expect(res.status).toBe(401);
-      expect((await res.json()).error.code).toBe('TOKEN_INVALID');
+      expect((await body<ErrorBody>(res)).error.code).toBe('TOKEN_INVALID');
     });
 
     it('returns 401 TOKEN_INVALID for a tampered token', async () => {
@@ -69,7 +83,7 @@ describe('authGuardMiddleware', () => {
       );
 
       expect(res.status).toBe(401);
-      expect((await res.json()).error.code).toBe('TOKEN_INVALID');
+      expect((await body<ErrorBody>(res)).error.code).toBe('TOKEN_INVALID');
     });
   });
 
@@ -86,7 +100,7 @@ describe('authGuardMiddleware', () => {
       );
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ user: { userId: USER.userId, email: USER.email } });
+      expect(await body<MeBody>(res)).toEqual({ user: { userId: USER.userId, email: USER.email } });
     });
 
     it('lets the handler run rather than short-circuiting the response', async () => {
@@ -96,8 +110,7 @@ describe('authGuardMiddleware', () => {
         })
       );
 
-      const body = await res.json();
-      expect(body.error).toBeUndefined();
+      expect((await body<MeBody>(res)).error).toBeUndefined();
     });
 
     it('propagates to routes registered on a prefixed group, as index.ts does', async () => {
@@ -121,7 +134,7 @@ describe('authGuardMiddleware', () => {
       );
 
       expect(res.status).toBe(200);
-      expect(await res.json()).toEqual({ user: { userId: USER.userId, email: USER.email } });
+      expect(await body<MeBody>(res)).toEqual({ user: { userId: USER.userId, email: USER.email } });
     });
   });
 });

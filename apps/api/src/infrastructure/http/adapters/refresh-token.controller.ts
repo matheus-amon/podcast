@@ -5,10 +5,11 @@
  */
 
 import { Elysia, t } from 'elysia';
+import type { HttpRoutes } from '../../../types/http';
 import type { RefreshTokenUseCase } from '@application/user/use-cases/refresh-token.use-case';
 
 export class RefreshTokenController {
-  public routes: Elysia;
+  public routes: HttpRoutes;
 
   constructor(private readonly refreshTokenUseCase: RefreshTokenUseCase) {
     this.routes = this.createRoutes();
@@ -17,7 +18,7 @@ export class RefreshTokenController {
   /**
    * Create refresh token routes
    */
-  private createRoutes(): Elysia {
+  private createRoutes(): HttpRoutes {
     return new Elysia({ prefix: '/auth' })
       // POST /auth/refresh
       .post(

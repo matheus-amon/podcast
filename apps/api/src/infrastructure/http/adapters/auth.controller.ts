@@ -5,6 +5,7 @@
  */
 
 import { Elysia, t } from "elysia";
+import type { HttpRoutes } from "../../../types/http";
 import { authGuardMiddleware } from "../../../middleware/auth-guard";
 import { rateLimiter } from "../../../middleware/rate-limit";
 import type { RegisterUserUseCase } from "../../../application/user/use-cases/register-user.use-case";
@@ -13,7 +14,7 @@ import type { LogoutUserUseCase } from "../../../application/user/use-cases/logo
 import type { RefreshTokenUseCase } from "../../../application/user/use-cases/refresh-token.use-case";
 
 export class AuthController {
-  public routes: Elysia;
+  public routes: HttpRoutes;
 
   constructor(
     private readonly registerUseCase: RegisterUserUseCase,
@@ -27,7 +28,7 @@ export class AuthController {
   /**
    * Create authentication routes
    */
-  private createRoutes(): Elysia {
+  private createRoutes(): HttpRoutes {
     return (
       new Elysia({ prefix: "/auth" })
         // POST /api/auth/register (Rate limit: 10 attempts per minute)

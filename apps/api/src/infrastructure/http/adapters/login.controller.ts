@@ -5,11 +5,12 @@
  */
 
 import { Elysia, t } from "elysia";
+import type { HttpRoutes } from "../../../types/http";
 import { rateLimiter } from "../../../middleware/rate-limit";
 import type { LoginUserUseCase } from "../../../application/user/use-cases/login-user.use-case";
 
 export class LoginController {
-  public routes: Elysia;
+  public routes: HttpRoutes;
 
   constructor(private readonly loginUseCase: LoginUserUseCase) {
     this.routes = this.createRoutes();
@@ -18,7 +19,7 @@ export class LoginController {
   /**
    * Create login routes
    */
-  private createRoutes(): Elysia {
+  private createRoutes(): HttpRoutes {
     return (
       new Elysia() // NO prefix - will be mounted under /auth by AuthController
         // POST /login (Rate limit: 10 attempts per minute)

@@ -6,6 +6,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import type { HttpRoutes } from '../../../types/http';
 import { CreateLeadUseCase } from '@application/leads/use-cases/create-lead.use-case';
 import { UpdateLeadUseCase } from '@application/leads/use-cases/update-lead.use-case';
 import { DeleteLeadUseCase } from '@application/leads/use-cases/delete-lead.use-case';
@@ -27,7 +28,7 @@ export class LeadController {
   /**
    * Cria as rotas do controller
    */
-  private createRoutes(): Elysia {
+  private createRoutes(): HttpRoutes {
     return new Elysia({ prefix: '/leads' })
       // GET /leads - Listar todos os leads
       .get(
@@ -173,7 +174,7 @@ export class LeadController {
   /**
    * Retorna a instância do Elysia com as rotas
    */
-  get routes(): Elysia {
+  get routes(): HttpRoutes {
     return this.app;
   }
 }

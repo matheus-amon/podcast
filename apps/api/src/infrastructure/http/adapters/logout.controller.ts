@@ -5,10 +5,11 @@
  */
 
 import { Elysia, t } from 'elysia';
+import type { HttpRoutes } from '../../../types/http';
 import type { LogoutUserUseCase } from '@application/user/use-cases/logout-user.use-case';
 
 export class LogoutController {
-  public routes: Elysia;
+  public routes: HttpRoutes;
 
   constructor(private readonly logoutUseCase: LogoutUserUseCase) {
     this.routes = this.createRoutes();
@@ -17,7 +18,7 @@ export class LogoutController {
   /**
    * Create logout routes
    */
-  private createRoutes(): Elysia {
+  private createRoutes(): HttpRoutes {
     return new Elysia() // NO prefix - will be mounted under /auth by AuthController
       // POST /logout
       .post(

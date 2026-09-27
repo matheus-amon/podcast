@@ -6,6 +6,7 @@
  */
 
 import { Elysia, t } from 'elysia';
+import type { HttpRoutes } from '../../../types/http';
 import { CreateBudgetUseCase } from '@application/budget/use-cases/create-budget.use-case';
 import { UpdateBudgetUseCase } from '@application/budget/use-cases/update-budget.use-case';
 import { DeleteBudgetUseCase } from '@application/budget/use-cases/delete-budget.use-case';
@@ -19,7 +20,7 @@ import { BudgetType } from '@domain/budget/value-objects/budget-type.enum';
 import { BudgetStatus } from '@domain/budget/value-objects/budget-status.enum';
 
 export class BudgetController {
-  public routes: Elysia;
+  public routes: HttpRoutes;
 
   constructor(
     private readonly createBudgetUseCase: CreateBudgetUseCase,
@@ -38,7 +39,7 @@ export class BudgetController {
   /**
    * Cria as rotas do controller
    */
-  private createRoutes(): Elysia {
+  private createRoutes(): HttpRoutes {
     return new Elysia({ prefix: '/budget' })
       // GET /budget - Listar todos os budgets
       .get(

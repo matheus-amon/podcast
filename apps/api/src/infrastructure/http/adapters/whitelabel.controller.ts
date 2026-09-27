@@ -6,11 +6,12 @@
  */
 
 import { Elysia, t } from 'elysia';
+import type { HttpRoutes } from '../../../types/http';
 import { GetWhitelabelConfig } from '@application/whitelabel/use-cases/get-whitelabel-config.use-case';
 import { UpdateWhitelabelConfig } from '@application/whitelabel/use-cases/update-whitelabel-config.use-case';
 
 export class WhitelabelController {
-  public routes: Elysia;
+  public routes: HttpRoutes;
 
   constructor(
     private readonly getConfigUseCase: GetWhitelabelConfig,
@@ -22,7 +23,7 @@ export class WhitelabelController {
   /**
    * Cria as rotas do controller
    */
-  private createRoutes(): Elysia {
+  private createRoutes(): HttpRoutes {
     return new Elysia({ prefix: '/whitelabel' })
       // GET /whitelabel/config - Buscar configuração atual
       .get('/config', async () => {
