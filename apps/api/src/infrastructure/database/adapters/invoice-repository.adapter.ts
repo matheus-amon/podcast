@@ -13,6 +13,12 @@ import { BillingStatus } from '@domain/billing/value-objects/billing-status.enum
 import { toIsoDate } from '../../../lib/date';
 
 type DbBilling = typeof billing.$inferSelect;
+/**
+ * Insert shape. `id` is serial and `createdAt` has a default, so $inferInsert
+ * makes both optional -- which is why the mapper returns this instead of
+ * `Omit<DbBilling, 'id' | 'createdAt'>`.
+ */
+type NewDbBilling = typeof billing.$inferInsert;
 
 /**
  * Mapper: Database → Domain
@@ -37,7 +43,7 @@ function mapDbToDomain(dbBilling: DbBilling): Invoice {
 /**
  * Mapper: Domain → Database
  */
-function mapDomainToDb(invoice: Invoice): Omit<DbBilling, 'id' | 'createdAt'> {
+function mapDomainToDb(invoice: Invoice): NewDbBilling {
   return {
     clientName: invoice.clientName,
     amount: invoice.amount,
@@ -125,6 +131,10 @@ export class PostgresInvoiceRepository implements IInvoiceRepository {
       .insert(billing)
       .values(dbData)
       .returning();
+
+    if (!result[0]) {
+      throw new Error('Invoice insert returned no row');
+    }
 
     return mapDbToDomain(result[0]);
   }

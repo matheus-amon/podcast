@@ -13,6 +13,8 @@ import { PaymentStatus } from '@domain/billing/value-objects/payment-status.enum
 import { PaymentMethod } from '@domain/billing/value-objects/payment-method.enum';
 
 type DbPayment = typeof payments.$inferSelect;
+/** Insert shape; `id` is serial and `createdAt` is defaulted. */
+type NewDbPayment = typeof payments.$inferInsert;
 
 /**
  * Mapper: Database → Domain
@@ -38,7 +40,7 @@ function mapDbToDomain(dbPayment: DbPayment): Payment {
 /**
  * Mapper: Domain → Database
  */
-function mapDomainToDb(payment: Payment): Omit<DbPayment, 'id' | 'createdAt'> {
+function mapDomainToDb(payment: Payment): NewDbPayment {
   return {
     invoiceId: parseInt(payment.invoiceId),
     amount: payment.amount,
@@ -127,6 +129,10 @@ export class PostgresPaymentRepository implements IPaymentRepository {
       .insert(payments)
       .values(dbData)
       .returning();
+
+    if (!result[0]) {
+      throw new Error('Payment insert returned no row');
+    }
 
     return mapDbToDomain(result[0]);
   }

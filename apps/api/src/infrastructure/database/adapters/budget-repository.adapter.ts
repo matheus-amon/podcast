@@ -153,6 +153,10 @@ export class PostgresBudgetRepository implements IBudgetRepository {
       .values(dbData)
       .returning();
 
+    if (!result[0]) {
+      throw new Error('Budget insert returned no row');
+    }
+
     return mapDbToDomain(result[0]);
   }
 
@@ -320,6 +324,10 @@ export class PostgresBudgetRepository implements IBudgetRepository {
       .insert(budgetTemplates)
       .values(dbData)
       .returning();
+
+    if (!result[0]) {
+      throw new Error('Budget template insert returned no row');
+    }
 
     return mapDbTemplateToDomain(result[0]);
   }

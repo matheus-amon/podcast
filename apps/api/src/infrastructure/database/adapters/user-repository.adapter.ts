@@ -11,6 +11,12 @@ import { User } from '../../../domain/user/entities/user.entity';
 import type { IUserRepository } from '../../../domain/user/ports/user-repository.port';
 
 type DbUser = typeof users.$inferSelect;
+/**
+ * Insert shape. `users.id` is a plain uuid primary key with no default — the
+ * domain generates it and `create` supplies it at the call site — so `id` is
+ * omitted here. `createdAt`/`updatedAt` are defaulted and stay optional.
+ */
+type NewDbUser = Omit<typeof users.$inferInsert, 'id'>;
 
 /**
  * Mapper: Database → Domain
@@ -34,7 +40,7 @@ function mapDbToDomain(dbUser: DbUser): User {
 /**
  * Mapper: Domain → Database
  */
-function mapDomainToDb(user: User): Omit<DbUser, 'id'> {
+function mapDomainToDb(user: User): NewDbUser {
   return {
     email: user.email,
     passwordHash: user.passwordHash,
@@ -93,6 +99,10 @@ export class PostgresUserRepository implements IUserRepository {
         id: user.id, // Explicitly set the ID from the entity
       })
       .returning();
+
+    if (!result[0]) {
+      throw new Error('User insert returned no row');
+    }
 
     return mapDbToDomain(result[0]);
   }
