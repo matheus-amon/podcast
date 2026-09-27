@@ -29,7 +29,7 @@ export class AuthController {
    */
   private createRoutes(): Elysia {
     return (
-      new Elysia({ prefix: "/api/auth" })
+      new Elysia({ prefix: "/auth" })
         // POST /api/auth/register (Rate limit: 10 attempts per minute)
         .use(rateLimiter(10))
         .post(

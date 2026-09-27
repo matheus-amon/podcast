@@ -5,12 +5,14 @@
  */
 
 import { db } from '@db/index';
-import { payments, type Payments as DbPayment } from '@db/schema';
+import { payments } from '@db/schema';
 import { eq, desc, and, gte, lte, sql, sum } from 'drizzle-orm';
 import type { IPaymentRepository, PaymentFilters, PaginatedPaymentResult, PaymentSummary } from '@domain/billing/ports/payment-repository.port';
 import { Payment } from '@domain/billing/entities/payment.entity';
 import { PaymentStatus } from '@domain/billing/value-objects/payment-status.enum';
 import { PaymentMethod } from '@domain/billing/value-objects/payment-method.enum';
+
+type DbPayment = typeof payments.$inferSelect;
 
 /**
  * Mapper: Database → Domain

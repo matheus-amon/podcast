@@ -9,35 +9,35 @@ import { verifyToken } from '../lib/jwt';
 
 export function authGuardMiddleware() {
   return new Elysia({ name: 'auth-guard' })
-    .onBeforeHandle(({ request, set }) => {
+    // `as: 'global'` is required. With the default 'scoped' the hooks are not
+    // applied to the consuming app's routes, so the context augmented by
+    // `resolve` below never reaches the handlers.
+    .onBeforeHandle({ as: 'global' }, ({ request, status }) => {
       const authHeader = request.headers.get('authorization');
 
       if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        set.status = 401;
-        return {
+        return status(401, {
           error: {
             code: 'TOKEN_MISSING',
             message: 'Authentication required',
           },
-        };
+        });
       }
 
-      const token = authHeader.substring(7);
-      const payload = verifyToken(token);
-
-      if (!payload) {
-        set.status = 401;
-        return {
+      if (!verifyToken(authHeader.substring(7))) {
+        return status(401, {
           error: {
             code: 'TOKEN_INVALID',
             message: 'Invalid or expired token',
           },
-        };
+        });
       }
-
-      // Return user context for downstream handlers
-      return {
-        user: payload,
-      };
+    })
+    // `onBeforeHandle` does not merge its return value into the handler
+    // context, so returning `{ user }` from it leaves `ctx.user` undefined.
+    // `resolve` is the hook that augments context.
+    .resolve({ as: 'global' }, ({ request }) => {
+      const authHeader = request.headers.get('authorization');
+      return { user: verifyToken(authHeader ? authHeader.substring(7) : '') };
     });
 }

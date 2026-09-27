@@ -15,8 +15,8 @@ import {
   payments,
 } from '@db/schema';
 import { sql, desc, count, and, gte, lte, eq, sum } from 'drizzle-orm';
+import type { IReportRepository } from '@domain/report/ports/report-repository.port';
 import type {
-  IReportRepository,
   ReportFilters,
   FinancialMetrics,
   EpisodeMetrics,

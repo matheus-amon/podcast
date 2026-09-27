@@ -15,6 +15,7 @@ import { CompleteEventUseCase } from '@application/agenda/use-cases/complete-eve
 import { AddAttendeeUseCase } from '@application/agenda/use-cases/add-attendee.use-case';
 import { RemoveAttendeeUseCase } from '@application/agenda/use-cases/remove-attendee.use-case';
 import { EventType, EventStatus } from '@domain/agenda/value-objects/event-status.enum';
+import { AgendaEvent } from '@domain/agenda/entities/agenda-event.entity';
 
 export class AgendaController {
   public routes: Elysia;

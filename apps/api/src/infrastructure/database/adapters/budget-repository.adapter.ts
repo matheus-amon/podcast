@@ -5,13 +5,16 @@
  */
 
 import { db } from '@db/index';
-import { budget, budgetTemplates, type Budget as DbBudget, type BudgetTemplates as DbBudgetTemplate } from '@db/schema';
+import { budget, budgetTemplates } from '@db/schema';
 import { eq, desc, and, gte, lte, sql, sum, type SQL } from 'drizzle-orm';
 import type { IBudgetRepository, BudgetFilters, PaginatedBudgetResult, BudgetSummary } from '@domain/budget/ports/budget-repository.port';
 import { Budget } from '@domain/budget/entities/budget.entity';
 import { BudgetTemplate } from '@domain/budget/entities/budget-template.entity';
 import { BudgetType } from '@domain/budget/value-objects/budget-type.enum';
 import { BudgetStatus } from '@domain/budget/value-objects/budget-status.enum';
+
+type DbBudget = typeof budget.$inferSelect;
+type DbBudgetTemplate = typeof budgetTemplates.$inferSelect;
 
 /**
  * Mapper: Database → Domain

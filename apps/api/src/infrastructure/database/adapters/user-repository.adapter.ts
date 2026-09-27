@@ -5,10 +5,12 @@
  */
 
 import { db } from '../../../db';
-import { users, type Users as DbUser } from '../../../db/schema';
+import { users } from '../../../db/schema';
 import { eq, and, isNull } from 'drizzle-orm';
 import { User } from '../../../domain/user/entities/user.entity';
 import type { IUserRepository } from '../../../domain/user/ports/user-repository.port';
+
+type DbUser = typeof users.$inferSelect;
 
 /**
  * Mapper: Database → Domain

@@ -5,8 +5,40 @@
  */
 
 import jwt from 'jsonwebtoken';
+import { randomBytes } from 'node:crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
+/**
+ * Resolves the signing secret.
+ *
+ * There is deliberately no hardcoded fallback. A committed default secret is
+ * a forgeable-token vulnerability: anyone who reads the repository can mint a
+ * valid access token for any userId.
+ *
+ * In production the variable is required. Elsewhere an ephemeral random secret
+ * is generated so local development still works, at the cost of tokens not
+ * surviving a restart.
+ */
+function resolveJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+
+  if (secret) {
+    return secret;
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error(
+      'JWT_SECRET is required when NODE_ENV=production. Generate one with: openssl rand -hex 32'
+    );
+  }
+
+  console.warn(
+    '⚠️  JWT_SECRET is not set. Generated an ephemeral secret for this process; tokens will not survive a restart.'
+  );
+
+  return randomBytes(32).toString('hex');
+}
+
+const JWT_SECRET = resolveJwtSecret();
 const JWT_EXPIRES_IN = '15m'; // Access token: 15 minutes
 const REFRESH_TOKEN_EXPIRES_IN = '7d'; // Refresh token: 7 days
 

@@ -4,7 +4,7 @@
  * End-to-end tests for authentication flow
  */
 
-import { describe, it, expect } from 'bun:test';
+import { describe, it, expect, beforeEach } from 'bun:test';
 
 describe('Authentication E2E', () => {
   const BASE_URL = process.env.TEST_API_URL || 'http://localhost:3001';

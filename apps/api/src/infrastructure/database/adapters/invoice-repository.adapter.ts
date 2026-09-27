@@ -5,11 +5,13 @@
  */
 
 import { db } from '@db/index';
-import { billing, type Billing as DbBilling } from '@db/schema';
+import { billing } from '@db/schema';
 import { eq, desc, and, gte, lte, sql, sum } from 'drizzle-orm';
 import type { IInvoiceRepository, InvoiceFilters, PaginatedInvoiceResult, BillingSummary } from '@domain/billing/ports/invoice-repository.port';
 import { Invoice } from '@domain/billing/entities/invoice.entity';
 import { BillingStatus } from '@domain/billing/value-objects/billing-status.enum';
+
+type DbBilling = typeof billing.$inferSelect;
 
 /**
  * Mapper: Database → Domain
