@@ -2,13 +2,14 @@ import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { leads, episodes, budget, agenda } from "../../db/schema";
 import { sql, desc, count, and, gte, lte, eq } from "drizzle-orm";
+import { toIsoDate } from "../../lib/date";
 
 export const dashboardRoutes = new Elysia({ prefix: "/dashboard" })
     .get("/metrics", async () => {
         // 3. Revenue (Current Month) - Use date string for date column comparison
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
-        const startDateStr = startOfMonth.toISOString().split('T')[0]; // YYYY-MM-DD format
+        const startDateStr = toIsoDate(startOfMonth); // YYYY-MM-DD format
 
         // 4. Upcoming Events (Next 7 days)
         const nextWeek = new Date();
@@ -54,7 +55,7 @@ export const dashboardRoutes = new Elysia({ prefix: "/dashboard" })
     .get("/charts/revenue", async () => {
         const startOfMonth = new Date();
         startOfMonth.setDate(1);
-        const startDateStr = startOfMonth.toISOString().split('T')[0]; // YYYY-MM-DD format
+        const startDateStr = toIsoDate(startOfMonth); // YYYY-MM-DD format
 
         const [currentRevenue] = await db.select({ value: sql<number>`sum(${budget.amount})` })
             .from(budget)

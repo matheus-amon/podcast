@@ -12,6 +12,7 @@ import { Budget } from '@domain/budget/entities/budget.entity';
 import { BudgetTemplate } from '@domain/budget/entities/budget-template.entity';
 import { BudgetType } from '@domain/budget/value-objects/budget-type.enum';
 import { BudgetStatus } from '@domain/budget/value-objects/budget-status.enum';
+import { toIsoDate } from '../../../lib/date';
 
 type DbBudget = typeof budget.$inferSelect;
 type DbBudgetTemplate = typeof budgetTemplates.$inferSelect;
@@ -45,7 +46,7 @@ function mapDomainToDb(budgetEntity: Budget): Omit<DbBudget, 'id' | 'createdAt'>
     amount: budgetEntity.amount,
     type: budgetEntity.type,
     category: budgetEntity.category,
-    date: budgetEntity.date.toISOString().split('T')[0],
+    date: toIsoDate(budgetEntity.date),
     responsible: budgetEntity.responsible ?? null,
     status: budgetEntity.status,
     connectedEpisodeId: budgetEntity.connectedEpisodeId ?? null,
@@ -342,11 +343,11 @@ export class PostgresBudgetRepository implements IBudgetRepository {
     }
 
     if (filters?.dateFrom) {
-      conditions.push(gte(budget.date, filters.dateFrom.toISOString().split('T')[0]));
+      conditions.push(gte(budget.date, toIsoDate(filters.dateFrom)));
     }
 
     if (filters?.dateTo) {
-      conditions.push(lte(budget.date, filters.dateTo.toISOString().split('T')[0]));
+      conditions.push(lte(budget.date, toIsoDate(filters.dateTo)));
     }
 
     if (filters?.connectedEpisodeId) {

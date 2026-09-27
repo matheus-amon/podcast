@@ -29,6 +29,7 @@ import { TimePeriod, getDateRange } from '@domain/report/value-objects/time-peri
 import { ReportType } from '@domain/report/value-objects/report-type.enum';
 import { BillingStatus } from '@domain/billing/value-objects/billing-status.enum';
 import { PaymentStatus } from '@domain/billing/value-objects/payment-status.enum';
+import { toIsoDate } from '../../../lib/date';
 
 export class PostgresReportRepository implements IReportRepository {
   /**
@@ -40,9 +41,9 @@ export class PostgresReportRepository implements IReportRepository {
     const sixMonthsAgo = new Date();
     sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
 
-    const startDateStr = start.toISOString().split('T')[0];
-    const endDateStr = end.toISOString().split('T')[0];
-    const sixMonthsAgoStr = sixMonthsAgo.toISOString().split('T')[0];
+    const startDateStr = toIsoDate(start);
+    const endDateStr = toIsoDate(end);
+    const sixMonthsAgoStr = toIsoDate(sixMonthsAgo);
 
     const [
       [revenueResult],
@@ -273,7 +274,7 @@ export class PostgresReportRepository implements IReportRepository {
    */
   async getDashboardMetrics(filters?: ReportFilters): Promise<DashboardMetrics> {
     const { start, end } = this.getDateRange(filters?.period ?? TimePeriod.MONTH, filters?.startDate, filters?.endDate);
-    const startDateStr = start.toISOString().split('T')[0];
+    const startDateStr = toIsoDate(start);
 
     const now = new Date();
     const nextWeek = new Date();

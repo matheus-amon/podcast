@@ -10,6 +10,7 @@ import { eq, desc, and, gte, lte, sql, sum } from 'drizzle-orm';
 import type { IInvoiceRepository, InvoiceFilters, PaginatedInvoiceResult, BillingSummary } from '@domain/billing/ports/invoice-repository.port';
 import { Invoice } from '@domain/billing/entities/invoice.entity';
 import { BillingStatus } from '@domain/billing/value-objects/billing-status.enum';
+import { toIsoDate } from '../../../lib/date';
 
 type DbBilling = typeof billing.$inferSelect;
 
@@ -40,7 +41,7 @@ function mapDomainToDb(invoice: Invoice): Omit<DbBilling, 'id' | 'createdAt'> {
   return {
     clientName: invoice.clientName,
     amount: invoice.amount,
-    dueDate: invoice.dueDate.toISOString().split('T')[0],
+    dueDate: toIsoDate(invoice.dueDate),
     status: invoice.status,
     invoiceNumber: invoice.invoiceNumber ?? null,
     subscriptionPlan: invoice.subscriptionPlan ?? null,
@@ -184,7 +185,7 @@ export class PostgresInvoiceRepository implements IInvoiceRepository {
    * Buscar invoices vencidas
    */
   async findOverdueInvoices(): Promise<Invoice[]> {
-    const now = new Date().toISOString().split('T')[0];
+    const now = toIsoDate(new Date());
 
     const results = await db
       .select()
@@ -278,11 +279,11 @@ export class PostgresInvoiceRepository implements IInvoiceRepository {
     }
 
     if (filters?.dueDateFrom) {
-      conditions.push(gte(billing.dueDate, filters.dueDateFrom.toISOString().split('T')[0]));
+      conditions.push(gte(billing.dueDate, toIsoDate(filters.dueDateFrom)));
     }
 
     if (filters?.dueDateTo) {
-      conditions.push(lte(billing.dueDate, filters.dueDateTo.toISOString().split('T')[0]));
+      conditions.push(lte(billing.dueDate, toIsoDate(filters.dueDateTo)));
     }
 
     if (filters?.clientName) {

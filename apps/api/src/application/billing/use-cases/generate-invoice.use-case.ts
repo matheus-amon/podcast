@@ -7,6 +7,7 @@
 import { Invoice } from '@domain/billing/entities/invoice.entity';
 import type { IInvoiceRepository } from '@domain/billing/ports/invoice-repository.port';
 import type { CreateInvoiceDTO } from '@domain/billing/entities/invoice.entity';
+import { toIsoDate } from '../../../lib/date';
 
 export interface GenerateInvoiceUseCaseInput extends CreateInvoiceDTO {}
 
@@ -37,7 +38,7 @@ export class GenerateInvoiceUseCase {
    */
   private generateInvoiceNumber(): string {
     const now = new Date();
-    const date = now.toISOString().split('T')[0].replace(/-/g, '');
+    const date = toIsoDate(now).replace(/-/g, '');
     const random = Math.floor(Math.random() * 100000).toString().padStart(5, '0');
     return `INV-${date}-${random}`;
   }

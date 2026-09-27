@@ -2,6 +2,7 @@ import { Elysia, t } from "elysia";
 import { db } from "../../db";
 import { budget, budgetTemplates, budgetTypeEnum, budgetStatusEnum } from "../../db/schema";
 import { eq, desc, sum, sql } from "drizzle-orm";
+import { toIsoDate } from "../../lib/date";
 
 // Type helpers from enum
 type BudgetType = typeof budgetTypeEnum.enumValues[number];
@@ -31,7 +32,7 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
     .post("/", async ({ body }) => {
         const [newEntry] = await db.insert(budget).values({
             ...body,
-            date: body.date ? body.date : new Date().toISOString().split('T')[0], // YYYY-MM-DD
+            date: body.date ? body.date : toIsoDate(new Date()),
             type: body.type as BudgetType | undefined,
             status: body.status as BudgetStatus | undefined,
         }).returning();
@@ -113,7 +114,7 @@ export const budgetRoutes = new Elysia({ prefix: "/budget" })
             return [];
         }
 
-        const currentDate = new Date().toISOString().split('T')[0];
+        const currentDate = toIsoDate(new Date());
         const newItems = template.items.map(item => ({
             ...item,
             type: item.type as BudgetType | undefined,

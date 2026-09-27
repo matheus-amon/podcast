@@ -5,6 +5,20 @@
  */
 
 import { describe, it, expect, beforeEach } from 'bun:test';
+import type { AuthResponse } from '../../src/types/auth';
+
+/** GET /api/auth/me returns the token payload, keyed by userId. */
+interface MeResponse {
+  user: { userId: string; email: string };
+}
+
+/**
+ * Response.json() is typed as `unknown`; these tests read fields off it.
+ * Annotate the call site rather than casting at every access.
+ */
+async function readJson<T>(res: Response): Promise<T> {
+  return (await res.json()) as T;
+}
 
 describe('Authentication E2E', () => {
   const BASE_URL = process.env.TEST_API_URL || 'http://localhost:3001';
@@ -26,7 +40,7 @@ describe('Authentication E2E', () => {
 
       expect(response.status).toBe(200);
 
-      const data = await response.json();
+      const data = await readJson<AuthResponse>(response);
 
       expect(data.user).toBeDefined();
       expect(data.user.email).toBe(testUser.email);
@@ -97,7 +111,7 @@ describe('Authentication E2E', () => {
         }),
       });
 
-      const data = await registerResponse.json();
+      const data = await readJson<AuthResponse>(registerResponse);
       refreshToken = data.refreshToken;
       accessToken = data.accessToken;
       userId = data.user.id;
@@ -112,7 +126,7 @@ describe('Authentication E2E', () => {
 
       expect(response.status).toBe(200);
 
-      const data = await response.json();
+      const data = await readJson<AuthResponse>(response);
       expect(data.accessToken).toBeDefined();
       expect(data.refreshToken).toBeDefined();
       expect(data.refreshToken).not.toBe(refreshToken);
@@ -159,7 +173,7 @@ describe('Authentication E2E', () => {
         body: JSON.stringify({ refreshToken }),
       });
 
-      const { accessToken: newAccessToken } = await refreshResponse.json();
+      const { accessToken: newAccessToken } = await readJson<AuthResponse>(refreshResponse);
 
       // Access protected route
       const meResponse = await fetch(`${BASE_URL}/api/auth/me`, {
@@ -169,7 +183,7 @@ describe('Authentication E2E', () => {
       });
 
       expect(meResponse.status).toBe(200);
-      const data = await meResponse.json();
+      const data = await readJson<MeResponse>(meResponse);
       expect(data.user).toBeDefined();
     });
   });
@@ -191,7 +205,7 @@ describe('Authentication E2E', () => {
         }),
       });
 
-      const data = await registerResponse.json();
+      const data = await readJson<AuthResponse>(registerResponse);
       refreshToken = data.refreshToken;
       accessToken = data.accessToken;
     });
@@ -205,7 +219,7 @@ describe('Authentication E2E', () => {
       });
 
       expect(initialMeResponse.status).toBe(200);
-      const initialData = await initialMeResponse.json();
+      const initialData = await readJson<MeResponse>(initialMeResponse);
 
       // Refresh tokens
       const refreshResponse = await fetch(`${BASE_URL}/api/auth/refresh`, {
@@ -214,7 +228,8 @@ describe('Authentication E2E', () => {
         body: JSON.stringify({ refreshToken }),
       });
 
-      const { accessToken: newAccessToken, refreshToken: newRefreshToken } = await refreshResponse.json();
+      const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+        await readJson<AuthResponse>(refreshResponse);
 
       // Request to /me with new token
       const newMeResponse = await fetch(`${BASE_URL}/api/auth/me`, {
@@ -224,7 +239,7 @@ describe('Authentication E2E', () => {
       });
 
       expect(newMeResponse.status).toBe(200);
-      const newData = await newMeResponse.json();
+      const newData = await readJson<MeResponse>(newMeResponse);
 
       // Verify same user session
       expect(newData.user.userId).toBe(initialData.user.userId);
@@ -240,7 +255,7 @@ describe('Authentication E2E', () => {
       });
 
       expect(refreshResponse1.status).toBe(200);
-      const { refreshToken: newRefreshToken } = await refreshResponse1.json();
+      const { refreshToken: newRefreshToken } = await readJson<AuthResponse>(refreshResponse1);
 
       // Try to use old refresh token again
       const refreshResponse2 = await fetch(`${BASE_URL}/api/auth/refresh`, {
