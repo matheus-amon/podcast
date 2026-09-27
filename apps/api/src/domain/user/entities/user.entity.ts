@@ -108,7 +108,10 @@ export class User {
    * Get avatar URL
    */
   get avatarUrl(): string | null {
-    return this._props.avatarUrl;
+    // The prop is optional; the getter's contract is `null`, never `undefined`.
+    // Normalising here also keeps the field in JSON responses instead of
+    // letting `undefined` drop the key entirely.
+    return this._props.avatarUrl ?? null;
   }
 
   /**
@@ -129,14 +132,14 @@ export class User {
    * Get email verification date
    */
   get emailVerifiedAt(): Date | null {
-    return this._props.emailVerifiedAt;
+    return this._props.emailVerifiedAt ?? null;
   }
 
   /**
    * Get last login date
    */
   get lastLoginAt(): Date | null {
-    return this._props.lastLoginAt;
+    return this._props.lastLoginAt ?? null;
   }
 
   /**
@@ -157,7 +160,7 @@ export class User {
    * Get deletion date
    */
   get deletedAt(): Date | null {
-    return this._props.deletedAt;
+    return this._props.deletedAt ?? null;
   }
 
   /**

@@ -20,12 +20,22 @@ function generateRequestId(): string {
  * Get log level from environment
  */
 const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
-const LOG_LEVELS: Record<string, number> = { error: 0, warn: 1, info: 2, debug: 3 };
+const LOG_LEVELS = { error: 0, warn: 1, info: 2, debug: 3 } as const;
+type LogLevel = keyof typeof LOG_LEVELS;
+
+const DEFAULT_LEVEL: LogLevel = 'info';
+
+/**
+ * Resolves a level name to its severity, falling back to `info` for anything
+ * unrecognised -- including a typo in LOG_LEVEL, which is a string from the
+ * environment and cannot be checked at compile time.
+ */
+function levelValue(level: string): number {
+    return LOG_LEVELS[level as LogLevel] ?? LOG_LEVELS[DEFAULT_LEVEL];
+}
 
 function shouldLog(level: string): boolean {
-    const currentLevel = LOG_LEVELS[LOG_LEVEL] ?? LOG_LEVELS['info'];
-    const checkLevel = LOG_LEVELS[level] ?? LOG_LEVELS['info'];
-    return checkLevel <= currentLevel;
+    return levelValue(level) <= levelValue(LOG_LEVEL);
 }
 
 /**

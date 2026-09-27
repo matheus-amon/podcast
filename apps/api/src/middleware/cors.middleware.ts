@@ -31,9 +31,14 @@ export function corsMiddleware() {
       let allowedOrigin = defaultOrigin;
       if (requestOrigin && allowedOrigins.includes(requestOrigin)) {
         allowedOrigin = requestOrigin;
-      } else if (allowedOrigins.length === 1 && allowedOrigins[0] !== defaultOrigin) {
-        // If there's only one allowed origin configured and it's not the default, use it
-        allowedOrigin = allowedOrigins[0];
+      } else if (allowedOrigins.length === 1) {
+        // If there's only one allowed origin configured and it's not the
+        // default, use it. Destructured so the single entry is narrowed rather
+        // than indexed, which reads as possibly-undefined.
+        const [only] = allowedOrigins;
+        if (only && only !== defaultOrigin) {
+          allowedOrigin = only;
+        }
       }
 
       // Set CORS headers for all responses
