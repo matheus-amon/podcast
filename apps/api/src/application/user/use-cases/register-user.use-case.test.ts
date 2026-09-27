@@ -6,8 +6,8 @@
 
 import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { RegisterUserUseCase } from './register-user.use-case';
-import type { IUserRepository } from '../../../../domain/user/ports/user-repository.port';
-import { User } from '../../../../domain/user/entities/user.entity';
+import type { IUserRepository } from '@domain/user/ports/user-repository.port';
+import { User } from '@domain/user/entities/user.entity';
 
 describe('RegisterUserUseCase', () => {
   let mockUserRepository: IUserRepository;

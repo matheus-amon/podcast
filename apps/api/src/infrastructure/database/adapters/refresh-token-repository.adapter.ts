@@ -7,7 +7,7 @@
 import { eq } from 'drizzle-orm';
 import { db } from '../../../db';
 import { refreshTokens } from '../../../db/schema';
-import type { RefreshToken, IRefreshTokenRepository } from '../../domain/user/ports/refresh-token-repository.port';
+import type { RefreshToken, IRefreshTokenRepository } from '@domain/user/ports/refresh-token-repository.port';
 
 export class PostgresRefreshTokenRepository implements IRefreshTokenRepository {
   async findById(id: string): Promise<RefreshToken | null> {

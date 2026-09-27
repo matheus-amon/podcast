@@ -5,7 +5,7 @@
  */
 
 import { Elysia, t } from 'elysia';
-import type { LogoutUserUseCase } from '../../application/user/use-cases/logout-user.use-case';
+import type { LogoutUserUseCase } from '@application/user/use-cases/logout-user.use-case';
 
 export class LogoutController {
   public routes: Elysia;

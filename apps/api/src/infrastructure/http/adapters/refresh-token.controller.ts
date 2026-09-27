@@ -5,7 +5,7 @@
  */
 
 import { Elysia, t } from 'elysia';
-import type { RefreshTokenUseCase } from '../../application/user/use-cases/refresh-token.use-case';
+import type { RefreshTokenUseCase } from '@application/user/use-cases/refresh-token.use-case';
 
 export class RefreshTokenController {
   public routes: Elysia;

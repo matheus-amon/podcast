@@ -6,8 +6,8 @@
 
 import { describe, it, expect } from 'bun:test';
 import { User } from './user.entity';
-import { Email } from './value-objects/email.vo';
-import { Password } from './value-objects/password.vo';
+import { Email } from '@domain/user/value-objects/email.vo';
+import { Password } from '@domain/user/value-objects/password.vo';
 
 describe('User Entity', () => {
   const validEmail = 'test@example.com';
