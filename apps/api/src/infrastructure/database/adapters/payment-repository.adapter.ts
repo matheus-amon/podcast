@@ -6,7 +6,7 @@
 
 import { db } from '@db/index';
 import { payments } from '@db/schema';
-import { eq, desc, and, gte, lte, sql, sum } from 'drizzle-orm';
+import { eq, isNull, desc, and, gte, lte, sql, sum, type SQL } from 'drizzle-orm';
 import type { IPaymentRepository, PaymentFilters, PaginatedPaymentResult, PaymentSummary } from '@domain/billing/ports/payment-repository.port';
 import { Payment } from '@domain/billing/entities/payment.entity';
 import { PaymentStatus } from '@domain/billing/value-objects/payment-status.enum';
@@ -248,7 +248,7 @@ export class PostgresPaymentRepository implements IPaymentRepository {
    * Construir cláusula WHERE dinâmica
    */
   private buildWhereClause(filters?: PaymentFilters) {
-    const conditions = [];
+    const conditions: SQL[] = [];
 
     if (filters?.status) {
       conditions.push(eq(payments.status, filters.status));
@@ -271,7 +271,9 @@ export class PostgresPaymentRepository implements IPaymentRepository {
     }
 
     // Excluir deletados
-    conditions.push(eq(payments.deletedAt, null));
+        // `eq(col, null)` compiles to `col = $1` with a null parameter, which is
+    // never true in SQL -- it must be IS NULL to exclude soft-deleted rows.
+    conditions.push(isNull(payments.deletedAt));
 
     if (conditions.length === 0) {
       return undefined;

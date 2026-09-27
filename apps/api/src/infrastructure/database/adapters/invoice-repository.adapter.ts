@@ -6,7 +6,7 @@
 
 import { db } from '@db/index';
 import { billing } from '@db/schema';
-import { eq, desc, and, gte, lte, sql, sum } from 'drizzle-orm';
+import { eq, isNull, desc, and, gte, lte, sql, sum, type SQL } from 'drizzle-orm';
 import type { IInvoiceRepository, InvoiceFilters, PaginatedInvoiceResult, BillingSummary } from '@domain/billing/ports/invoice-repository.port';
 import { Invoice } from '@domain/billing/entities/invoice.entity';
 import { BillingStatus } from '@domain/billing/value-objects/billing-status.enum';
@@ -278,7 +278,7 @@ export class PostgresInvoiceRepository implements IInvoiceRepository {
    * Construir cláusula WHERE dinâmica
    */
   private buildWhereClause(filters?: InvoiceFilters) {
-    const conditions = [];
+    const conditions: SQL[] = [];
 
     if (filters?.status) {
       conditions.push(eq(billing.status, filters.status));
@@ -301,7 +301,9 @@ export class PostgresInvoiceRepository implements IInvoiceRepository {
     }
 
     // Excluir deletados
-    conditions.push(eq(billing.deletedAt, null));
+        // `eq(col, null)` compiles to `col = $1` with a null parameter, which is
+    // never true in SQL -- it must be IS NULL to exclude soft-deleted rows.
+    conditions.push(isNull(billing.deletedAt));
 
     if (conditions.length === 0) {
       return undefined;

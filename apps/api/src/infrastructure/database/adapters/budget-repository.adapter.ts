@@ -6,7 +6,7 @@
 
 import { db } from '@db/index';
 import { budget, budgetTemplates } from '@db/schema';
-import { eq, desc, and, gte, lte, sql, sum, type SQL } from 'drizzle-orm';
+import { eq, isNull, desc, and, gte, lte, sql, sum, type SQL } from 'drizzle-orm';
 import type { IBudgetRepository, BudgetFilters, PaginatedBudgetResult, BudgetSummary } from '@domain/budget/ports/budget-repository.port';
 import { Budget } from '@domain/budget/entities/budget.entity';
 import { BudgetTemplate } from '@domain/budget/entities/budget-template.entity';
@@ -363,7 +363,9 @@ export class PostgresBudgetRepository implements IBudgetRepository {
     }
 
     // Excluir deletados (soft delete)
-    conditions.push(eq(budget.deletedAt, null));
+        // `eq(col, null)` compiles to `col = $1` with a null parameter, which is
+    // never true in SQL -- it must be IS NULL to exclude soft-deleted rows.
+    conditions.push(isNull(budget.deletedAt));
 
     if (conditions.length === 0) {
       return undefined;
