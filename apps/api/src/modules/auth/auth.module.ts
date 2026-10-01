@@ -23,8 +23,8 @@ export function createAuthModule(): AuthController {
   const refreshTokenRepository = new PostgresRefreshTokenRepository();
 
   // Application layer (use cases)
-  const registerUseCase = new RegisterUserUseCase(userRepository);
-  const loginUseCase = new LoginUserUseCase(userRepository);
+  const registerUseCase = new RegisterUserUseCase(userRepository, refreshTokenRepository);
+  const loginUseCase = new LoginUserUseCase(userRepository, refreshTokenRepository);
   const logoutUseCase = new LogoutUserUseCase(refreshTokenRepository);
   const refreshTokenUseCase = new RefreshTokenUseCase(refreshTokenRepository);
 

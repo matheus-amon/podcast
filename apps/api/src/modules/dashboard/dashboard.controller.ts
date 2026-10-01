@@ -57,19 +57,29 @@ export const dashboardRoutes = new Elysia({ prefix: "/dashboard" })
         startOfMonth.setDate(1);
         const startDateStr = toIsoDate(startOfMonth); // YYYY-MM-DD format
 
-        const [currentRevenue] = await db.select({ value: sql<number>`sum(${budget.amount})` })
-            .from(budget)
-            .where(and(
-                eq(budget.type, 'INCOME'),
-                gte(budget.date, startDateStr!)
-            ));
+        // Both aggregates are independent, so they run concurrently rather than
+        // paying two round-trips back to back. The result arrays are kept whole
+        // (rather than destructured to [currentRevenue]) because a bare
+        // aggregate always returns one row, and indexing later reads more
+        // clearly than unpacking at the await.
+        const [revenueResultArray, expenseResultArray] = await Promise.all([
+            db.select({ value: sql<number>`sum(${budget.amount})` })
+                .from(budget)
+                .where(and(
+                    eq(budget.type, 'INCOME'),
+                    gte(budget.date, startDateStr!)
+                )),
 
-        const [currentExpense] = await db.select({ value: sql<number>`sum(${budget.amount})` })
-            .from(budget)
-            .where(and(
-                eq(budget.type, 'EXPENSE'),
-                gte(budget.date, startDateStr!)
-            ));
+            db.select({ value: sql<number>`sum(${budget.amount})` })
+                .from(budget)
+                .where(and(
+                    eq(budget.type, 'EXPENSE'),
+                    gte(budget.date, startDateStr!)
+                ))
+        ]);
+
+        const currentRevenue = revenueResultArray[0];
+        const currentExpense = expenseResultArray[0];
 
         return [
             { name: 'Jan', revenue: 4000, expenses: 2400 },
@@ -81,7 +91,12 @@ export const dashboardRoutes = new Elysia({ prefix: "/dashboard" })
         ];
     })
     .get("/recent-activity", async () => {
-        const recentLeads = await db.select().from(leads).orderBy(desc(leads.createdAt)).limit(5);
-        const recentEpisodes = await db.select().from(episodes).orderBy(desc(episodes.createdAt)).limit(5);
+        // Two independent reads, so concurrent. The shape test in
+        // tests/unit/modules/dashboard asserts both keys survive an empty table.
+        const [recentLeads, recentEpisodes] = await Promise.all([
+            db.select().from(leads).orderBy(desc(leads.createdAt)).limit(5),
+            db.select().from(episodes).orderBy(desc(episodes.createdAt)).limit(5)
+        ]);
+
         return { recentLeads, recentEpisodes };
     });

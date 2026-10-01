@@ -5,6 +5,12 @@
  */
 
 import type { AgendaRepositoryPort } from '@domain/agenda/ports/agenda-repository.port';
+import {
+  AttendeeTimeConflictError,
+  DuplicateAttendeeError,
+  EventCancelledError,
+  EventNotFoundError,
+} from '@domain/agenda/errors/agenda.error';
 
 export class AddAttendeeUseCase {
   constructor(private readonly agendaRepository: AgendaRepositoryPort) {}
@@ -16,12 +22,21 @@ export class AddAttendeeUseCase {
     // Buscar evento existente
     const existingEvent = await this.agendaRepository.findById(eventId);
     if (!existingEvent) {
-      throw new Error('Event not found');
+      throw new EventNotFoundError(eventId);
     }
 
     // Verificar se o evento já está cancelado
     if (existingEvent.isCancelled()) {
-      throw new Error('Cannot add attendee to a cancelled event');
+      throw new EventCancelledError('add attendee to');
+    }
+
+    // The duplicate check has to live here, not only in the entity.
+    // `AgendaEvent.addAttendee` skips a userId that is already present, so
+    // without this guard the second POST answered 200 {success: true} having
+    // written nothing — a success response describing a write that never
+    // happened, which is the hardest kind of bug to notice.
+    if (existingEvent.attendees.includes(userId)) {
+      throw new DuplicateAttendeeError(eventId, userId);
     }
 
     // Verificar conflito de horário
@@ -70,7 +85,7 @@ export class AddAttendeeUseCase {
     });
 
     if (hasConflict) {
-      throw new Error(`Time conflict detected for attendee ${userId}`);
+      throw new AttendeeTimeConflictError(userId);
     }
   }
 }

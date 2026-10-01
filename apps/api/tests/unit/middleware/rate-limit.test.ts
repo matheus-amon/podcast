@@ -1,158 +1,158 @@
 /**
- * Rate Limiter Middleware Tests
+ * Rate Limiter Tests
  *
- * Test rate limiting functionality
+ * These drive the real Elysia plugin through app.handle(). An earlier version of
+ * this file reimplemented the limiter's logic locally and asserted on that
+ * copy, so it passed while src/middleware/rate-limit.ts sat at 21.95% line
+ * coverage — the tests could not have caught a regression in it.
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'bun:test';
+import { describe, it, expect } from 'bun:test';
+import { Elysia } from 'elysia';
+import { rateLimiter, strictRateLimiter } from '../../../src/middleware/rate-limit';
 
-// Import the internal store manipulation functions
-let store: Record<string, { count: number; resetAt: number }> = {};
-
-const WINDOW_MS = 60 * 1000; // 1 minute
-
-function createRateLimitedRequest(ip: string, maxRequests: number): { status: number; error?: any } {
-  const now = Date.now();
-
-  if (!store[ip]) {
-    store[ip] = {
-      count: 1,
-      resetAt: now + WINDOW_MS,
-    };
-    return { status: 200 };
-  }
-
-  if (now > store[ip].resetAt) {
-    store[ip] = {
-      count: 1,
-      resetAt: now + WINDOW_MS,
-    };
-    return { status: 200 };
-  }
-
-  if (store[ip].count >= maxRequests) {
-    return {
-      status: 429,
-      error: {
-        code: 'RATE_LIMIT_EXCEEDED',
-        message: `Too many requests`,
-        retryAfter: Math.ceil((store[ip].resetAt - now) / 1000),
-      },
-    };
-  }
-
-  store[ip].count++;
-  return { status: 200 };
+interface RateLimitResponse {
+  status: number;
+  body: any;
 }
 
-describe('RateLimiter', () => {
-  beforeEach(() => {
-    store = {};
+/**
+ * The limiter keys on x-forwarded-for and keeps a module-level store, so each
+ * test uses its own IP to stay independent of the others.
+ */
+async function hit(ip: string, maxRequests: number, windowMs = 60_000): Promise<RateLimitResponse[]> {
+  const app = new Elysia()
+    .use(rateLimiter(maxRequests, windowMs))
+    .get('/probe', () => ({ ok: true }));
+
+  const responses: RateLimitResponse[] = [];
+  for (let i = 0; i < maxRequests + 1; i++) {
+    const res = await app.handle(
+      new Request('http://localhost/probe', { headers: { 'x-forwarded-for': ip } }),
+    );
+    responses.push({ status: res.status, body: await res.json() });
+  }
+  return responses;
+}
+
+/** Reads one response by index, failing loudly if it is absent. */
+function at(responses: RateLimitResponse[], index: number): RateLimitResponse {
+  const response = responses[index];
+  if (!response) {
+    throw new Error(`no response recorded at index ${index}`);
+  }
+  return response;
+}
+
+describe('rateLimiter', () => {
+  it('allows requests up to the limit and blocks the one past it', async () => {
+    const responses = await hit('10.0.0.1', 3);
+
+    expect(responses.slice(0, 3).map((r) => r.status)).toEqual([200, 200, 200]);
+    expect(at(responses, 3).status).toBe(429);
   });
 
-  afterEach(() => {
-    store = {};
+  it('returns RATE_LIMIT_EXCEEDED with a retryAfter in seconds', async () => {
+    const responses = await hit('10.0.0.2', 1, 60_000);
+
+    expect(at(responses, 1).status).toBe(429);
+    expect(at(responses, 1).body.error.code).toBe('RATE_LIMIT_EXCEEDED');
+    expect(at(responses, 1).body.error.retryAfter).toBeGreaterThan(0);
+    expect(at(responses, 1).body.error.retryAfter).toBeLessThanOrEqual(60);
   });
 
-  it('should allow requests under the limit', () => {
-    const maxRequests = 3;
-    const ip = '127.0.0.1';
+  it('names the configured limit and window in the message', async () => {
+    const responses = await hit('10.0.0.3', 2, 30_000);
 
-    // First 3 requests should pass
-    for (let i = 0; i < maxRequests; i++) {
-      const result = createRateLimitedRequest(ip, maxRequests);
-      expect(result.status).toBe(200);
+    expect(at(responses, 2).body.error.message).toContain('Maximum 2 requests');
+    expect(at(responses, 2).body.error.message).toContain('30 seconds');
+  });
+
+  it('counts each IP separately', async () => {
+    const app = new Elysia()
+      .use(rateLimiter(1))
+      .get('/probe', () => ({ ok: true }));
+
+    const first = await app.handle(
+      new Request('http://localhost/probe', { headers: { 'x-forwarded-for': '1.1.1.1' } }),
+    );
+    const other = await app.handle(
+      new Request('http://localhost/probe', { headers: { 'x-forwarded-for': '2.2.2.2' } }),
+    );
+    const blocked = await app.handle(
+      new Request('http://localhost/probe', { headers: { 'x-forwarded-for': '1.1.1.1' } }),
+    );
+
+    expect(first.status).toBe(200);
+    expect(other.status).toBe(200);
+    expect(blocked.status).toBe(429);
+  });
+
+  it('treats a missing x-forwarded-for as a single shared bucket', async () => {
+    const app = new Elysia()
+      .use(rateLimiter(1))
+      .get('/probe', () => ({ ok: true }));
+
+    const first = await app.handle(new Request('http://localhost/probe'));
+    const second = await app.handle(new Request('http://localhost/probe'));
+
+    expect(first.status).toBe(200);
+    expect(second.status).toBe(429);
+  });
+
+  it('starts a fresh window once the old one has elapsed', async () => {
+    const app = new Elysia()
+      .use(rateLimiter(1, 20))
+      .get('/probe', () => ({ ok: true }));
+
+    const send = () =>
+      app.handle(
+        new Request('http://localhost/probe', { headers: { 'x-forwarded-for': '10.0.0.4' } }),
+      );
+
+    const first = await send();
+    const blocked = await send();
+
+    // Wait past resetAt so the stored entry is treated as expired.
+    await Bun.sleep(40);
+
+    const afterWindow = await send();
+
+    expect(first.status).toBe(200);
+    expect(blocked.status).toBe(429);
+    expect(afterWindow.status).toBe(200);
+  });
+});
+
+describe('strictRateLimiter', () => {
+  it('defaults to 10 attempts per minute', async () => {
+    const app = new Elysia()
+      .use(strictRateLimiter())
+      .get('/probe', () => ({ ok: true }));
+
+    const send = () =>
+      app.handle(
+        new Request('http://localhost/probe', { headers: { 'x-forwarded-for': '10.0.0.5' } }),
+      );
+
+    for (let i = 0; i < 10; i++) {
+      expect((await send()).status).toBe(200);
     }
+    expect((await send()).status).toBe(429);
   });
 
-  it('should block requests over the limit', () => {
-    const maxRequests = 2;
-    const ip = '192.168.1.1';
+  it('honours an explicit override', async () => {
+    const app = new Elysia()
+      .use(strictRateLimiter(2))
+      .get('/probe', () => ({ ok: true }));
 
-    // First 2 requests should pass
-    for (let i = 0; i < maxRequests; i++) {
-      const result = createRateLimitedRequest(ip, maxRequests);
-      expect(result.status).toBe(200);
-    }
+    const send = () =>
+      app.handle(
+        new Request('http://localhost/probe', { headers: { 'x-forwarded-for': '10.0.0.6' } }),
+      );
 
-    // Third request should be blocked
-    const result = createRateLimitedRequest(ip, maxRequests);
-    expect(result.status).toBe(429);
-    expect(result.error).toBeDefined();
-    expect(result.error.code).toBe('RATE_LIMIT_EXCEEDED');
-  });
-
-  it('should return retry-after in error response', () => {
-    const maxRequests = 1;
-    const ip = '172.16.0.1';
-
-    // First request passes
-    const result1 = createRateLimitedRequest(ip, maxRequests);
-    expect(result1.status).toBe(200);
-
-    // Second request should be rate limited
-    const result2 = createRateLimitedRequest(ip, maxRequests);
-    expect(result2.status).toBe(429);
-    expect(result2.error.retryAfter).toBeGreaterThan(0);
-    expect(result2.error.retryAfter).toBeLessThanOrEqual(60);
-  });
-
-  it('should track different IPs separately', () => {
-    const maxRequests = 1;
-
-    // IP 1 uses its limit
-    const result1 = createRateLimitedRequest('1.1.1.1', maxRequests);
-    expect(result1.status).toBe(200);
-
-    // IP 2 should still be allowed
-    const result2 = createRateLimitedRequest('2.2.2.2', maxRequests);
-    expect(result2.status).toBe(200);
-
-    // IP 1 should be blocked
-    const result3 = createRateLimitedRequest('1.1.1.1', maxRequests);
-    expect(result3.status).toBe(429);
-  });
-
-  it('should allow custom max requests', () => {
-    const ip = '10.0.0.1';
-
-    // Test with limit of 5
-    for (let i = 0; i < 5; i++) {
-      const result = createRateLimitedRequest(ip, 5);
-      expect(result.status).toBe(200);
-    }
-
-    const result6 = createRateLimitedRequest(ip, 5);
-    expect(result6.status).toBe(429);
-  });
-
-  it('should respect login rate limit (5 per minute)', () => {
-    const loginIp = 'user-ip';
-    const loginLimit = 5;
-
-    // 5 login attempts should pass
-    for (let i = 0; i < 5; i++) {
-      const result = createRateLimitedRequest(loginIp, loginLimit);
-      expect(result.status).toBe(200);
-    }
-
-    // 6th attempt should fail
-    const result = createRateLimitedRequest(loginIp, loginLimit);
-    expect(result.status).toBe(429);
-  });
-
-  it('should respect register rate limit (3 per minute)', () => {
-    const registerIp = 'register-ip';
-    const registerLimit = 3;
-
-    // 3 register attempts should pass
-    for (let i = 0; i < 3; i++) {
-      const result = createRateLimitedRequest(registerIp, registerLimit);
-      expect(result.status).toBe(200);
-    }
-
-    // 4th attempt should fail
-    const result = createRateLimitedRequest(registerIp, registerLimit);
-    expect(result.status).toBe(429);
+    expect((await send()).status).toBe(200);
+    expect((await send()).status).toBe(200);
+    expect((await send()).status).toBe(429);
   });
 });

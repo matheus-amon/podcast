@@ -5,6 +5,11 @@
  */
 
 import type { AgendaRepositoryPort } from '@domain/agenda/ports/agenda-repository.port';
+import {
+  AttendeeNotFoundError,
+  EventCancelledError,
+  EventNotFoundError,
+} from '@domain/agenda/errors/agenda.error';
 
 export class RemoveAttendeeUseCase {
   constructor(private readonly agendaRepository: AgendaRepositoryPort) {}
@@ -16,12 +21,18 @@ export class RemoveAttendeeUseCase {
     // Buscar evento existente
     const existingEvent = await this.agendaRepository.findById(eventId);
     if (!existingEvent) {
-      throw new Error('Event not found');
+      throw new EventNotFoundError(eventId);
     }
 
     // Verificar se o evento já está cancelado
     if (existingEvent.isCancelled()) {
-      throw new Error('Cannot remove attendee from a cancelled event');
+      throw new EventCancelledError('remove attendee from');
+    }
+
+    // Same reason as the add path: `removeAttendee` splices nothing when the id
+    // is absent, so without this the DELETE answers 200 having changed nothing.
+    if (!existingEvent.attendees.includes(userId)) {
+      throw new AttendeeNotFoundError(userId);
     }
 
     // Remover participante

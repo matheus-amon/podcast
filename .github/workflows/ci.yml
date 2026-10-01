@@ -36,6 +36,31 @@ jobs:
       - name: Typecheck
         run: bunx tsc --noEmit
 
+  api-tests:
+    # `bun test` alone was never run in CI, which is why 41 failures sat on
+    # main unnoticed. DB-backed and e2e suites skip themselves without a
+    # database, so this needs no service container. The coverage gate in the
+    # same command is the one that actually bars — the old
+    # `coverageThreshold` in bunfig.toml was Jest syntax Bun ignores.
+    name: API (test + coverage gate)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install
+
+      - name: Run tests with coverage gate
+        run: bun run test:coverage
+
   web:
     name: Web (test + build)
     runs-on: ubuntu-latest

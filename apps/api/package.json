@@ -3,6 +3,13 @@
   "module": "index.ts",
   "type": "module",
   "private": true,
+  "scripts": {
+    "test": "bun test",
+    "test:e2e": "RUN_E2E=1 bun test ./tests/e2e",
+    "db:migrate": "drizzle-kit migrate",
+    "db:generate": "drizzle-kit generate",
+    "test:coverage": "bun test --coverage --coverage-reporter=lcov --coverage-dir=coverage && bun run scripts/check-coverage.ts"
+  },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/jsonwebtoken": "^9.0.10",

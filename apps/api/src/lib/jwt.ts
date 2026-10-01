@@ -5,7 +5,7 @@
  */
 
 import jwt from 'jsonwebtoken';
-import { randomBytes } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 
 /**
  * Resolves the signing secret.
@@ -61,10 +61,16 @@ export function signAccessToken(payload: Omit<JWTPayload, 'type'>): string {
 
 /**
  * Sign a refresh token
+ *
+ * The `jti` is what makes each token distinct. Without it the payload is only
+ * userId + email + type + iat + exp, so two refreshes within the same second
+ * produce byte-identical tokens — and since `refresh_tokens.token` is unique,
+ * rotation then fails on insert and the client is left with a revoked token it
+ * cannot replace.
  */
 export function signRefreshToken(payload: Omit<JWTPayload, 'type'>): string {
   return jwt.sign(
-    { ...payload, type: 'refresh' as const },
+    { ...payload, type: 'refresh' as const, jti: randomUUID() },
     JWT_SECRET,
     { expiresIn: REFRESH_TOKEN_EXPIRES_IN }
   );
