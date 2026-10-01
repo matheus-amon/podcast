@@ -48,7 +48,10 @@ Thumbs.db
 .bun
 
 # Drizzle
-drizzle/meta
+# NOTE: apps/api/drizzle/meta is deliberately NOT ignored. It is the migration
+# journal — drizzle-kit refuses to apply migrations whose meta is missing from
+# the repo, and without it `bun run db:migrate` only works on the machine that
+# generated the SQL.
 
 # Misc
 .vercel

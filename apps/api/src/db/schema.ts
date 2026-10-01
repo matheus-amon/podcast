@@ -218,7 +218,10 @@ export const users = pgTable('users', {
 export const refreshTokens = pgTable('refresh_tokens', {
     id: uuid('id').primaryKey(),
     userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
-    token: varchar('token', { length: 255 }).notNull().unique(),
+    // text, not varchar(255): a JWT refresh token is ~280 characters, so every
+    // insert into this table failed with "value too long for character
+    // varying(255)" and refresh was never usable end to end.
+    token: text('token').notNull().unique(),
     expiresAt: timestamp('expires_at').notNull(),
     usedAt: timestamp('used_at'),
     revokedAt: timestamp('revoked_at'),

@@ -36,12 +36,17 @@ Serves on `http://localhost:3001`. Swagger UI at
 `http://localhost:3001/swagger`.
 
 Requires a running PostgreSQL instance — set the connection string in
-`apps/api/.env`. To create the schema:
+`apps/api/.env`. The schema is versioned in `apps/api/drizzle`, so bring a
+database up to date with migrations:
 
 ```bash
 cd apps/api
-bun x drizzle-kit push
+bun run db:migrate
 ```
+
+`bun x drizzle-kit push` also works for local experimentation, but it diffs a
+live database and writes no migration, so anything it changes exists nowhere
+else. Use it only for throwaway experiments.
 
 ### Frontend
 
