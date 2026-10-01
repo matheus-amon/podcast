@@ -10,7 +10,7 @@ import { BillingStatus } from '../../../../src/domain/billing/value-objects/bill
 
 describe('Invoice', () => {
   describe('create', () => {
-    const futureDate = new Date('2026-04-01');
+    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     it('should create valid invoice when data is valid', () => {
       const invoice = Invoice.create({
@@ -161,7 +161,7 @@ describe('Invoice', () => {
   describe('fromProps', () => {
     it('should create invoice from existing props', () => {
       const now = new Date();
-      const futureDate = new Date('2026-04-01');
+      const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
       const props = {
         id: 'test-id',
         clientName: 'Acme Corp',
@@ -182,7 +182,7 @@ describe('Invoice', () => {
   });
 
   describe('updateClientName', () => {
-    const futureDate = new Date('2026-04-01');
+    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     it('should update clientName', () => {
       const invoice = Invoice.create({
@@ -210,7 +210,7 @@ describe('Invoice', () => {
   });
 
   describe('updateAmount', () => {
-    const futureDate = new Date('2026-04-01');
+    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     it('should update amount', () => {
       const invoice = Invoice.create({
@@ -254,7 +254,7 @@ describe('Invoice', () => {
   });
 
   describe('markAsPaid', () => {
-    const futureDate = new Date('2026-04-01');
+    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     it('should change status to PAID', () => {
       const invoice = Invoice.create({
@@ -306,7 +306,7 @@ describe('Invoice', () => {
   });
 
   describe('markAsOverdue', () => {
-    const futureDate = new Date('2026-04-01');
+    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     it('should change status to OVERDUE', () => {
       const invoice = Invoice.create({
@@ -339,7 +339,7 @@ describe('Invoice', () => {
   });
 
   describe('cancel', () => {
-    const futureDate = new Date('2026-04-01');
+    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     it('should change status to CANCELLED', () => {
       const invoice = Invoice.create({
@@ -372,7 +372,7 @@ describe('Invoice', () => {
   });
 
   describe('reactivate', () => {
-    const futureDate = new Date('2026-04-01');
+    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     it('should change status to PENDING from OVERDUE', () => {
       const invoice = Invoice.fromProps({
@@ -414,7 +414,7 @@ describe('Invoice', () => {
         id: 'test-id',
         clientName: 'Acme Corp',
         amount: 1500.00,
-        dueDate: new Date('2026-04-01'),
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         status: BillingStatus.PAID,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -427,7 +427,7 @@ describe('Invoice', () => {
       const invoice = Invoice.create({
         clientName: 'Acme Corp',
         amount: 1500.00,
-        dueDate: new Date('2026-04-01'),
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       });
 
       expect(invoice.isPaid()).toBe(false);
@@ -439,7 +439,7 @@ describe('Invoice', () => {
       const invoice = Invoice.create({
         clientName: 'Acme Corp',
         amount: 1500.00,
-        dueDate: new Date('2026-04-01'),
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
       });
 
       expect(invoice.isPending()).toBe(true);
@@ -452,7 +452,7 @@ describe('Invoice', () => {
         id: 'test-id',
         clientName: 'Acme Corp',
         amount: 1500.00,
-        dueDate: new Date('2026-04-01'),
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         status: BillingStatus.OVERDUE,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -468,7 +468,7 @@ describe('Invoice', () => {
         id: 'test-id',
         clientName: 'Acme Corp',
         amount: 1500.00,
-        dueDate: new Date('2026-04-01'),
+        dueDate: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
         status: BillingStatus.CANCELLED,
         createdAt: new Date(),
         updatedAt: new Date(),
@@ -511,7 +511,7 @@ describe('Invoice', () => {
   });
 
   describe('formatAmount', () => {
-    const futureDate = new Date('2026-04-01');
+    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     it('should format amount as Brazilian Real', () => {
       const invoice = Invoice.create({
@@ -526,7 +526,7 @@ describe('Invoice', () => {
   });
 
   describe('toObject', () => {
-    const futureDate = new Date('2026-04-01');
+    const futureDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
 
     it('should return a copy of props', () => {
       const invoice = Invoice.create({

@@ -7,6 +7,16 @@
 
 import { beforeEach, afterEach } from 'bun:test';
 
+// Allow unit tests to import the db module without a real database.
+// If DATABASE_URL is missing we install a dummy value so the import does
+// not throw, and mark DB-backed suites to skip (see
+// tests/unit/infrastructure/user-repository.adapter.test.ts).
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL =
+    'postgresql://postgres:postgres@localhost:5432/podcast_saas';
+  (process.env as any).__SKIP_DB__ = '1';
+}
+
 // Mock console.error para evitar poluição nos testes
 const originalConsoleError = console.error;
 beforeEach(() => {

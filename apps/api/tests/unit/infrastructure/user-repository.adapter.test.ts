@@ -10,7 +10,7 @@ import { User } from '../../../src/domain/user/entities/user.entity';
 import { db } from '../../../src/db';
 import { users } from '../../../src/db/schema';
 
-describe('PostgresUserRepository', () => {
+describe.skipIf((process.env as any).__SKIP_DB__ === '1')('PostgresUserRepository', () => {
   let repository: PostgresUserRepository;
 
   beforeEach(async () => {

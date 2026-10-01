@@ -2,7 +2,10 @@ import { describe, it } from "bun:test";
 import { Elysia } from "elysia";
 import { dashboardRoutes } from "./src/modules/dashboard/dashboard.controller";
 
-describe("Dashboard Controller Benchmark", () => {
+// Benchmark needs a real database (see comment inside). Skipped by default so
+// `bun test` stays green; run explicitly with RUN_BENCHMARK=1 + DB up.
+const runBenchmark = process.env.RUN_BENCHMARK === '1' && (process.env as any).__SKIP_DB__ !== '1';
+describe.skipIf(!runBenchmark)("Dashboard Controller Benchmark", () => {
     const app = new Elysia().use(dashboardRoutes);
 
     it("Measure baseline /metrics", async () => {

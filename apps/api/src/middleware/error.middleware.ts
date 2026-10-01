@@ -16,7 +16,11 @@ interface ErrorResponse {
 export const errorMiddleware = new Elysia({
     name: 'error-handler'
 })
-    .onError(({ code, error, set, request }) => {
+    // `as: 'global'` is required. With the default 'local' the hook belongs to
+    // this plugin's own (empty) route set, so it never runs for the routes
+    // registered on the consuming app — every validation failure escaped as
+    // Elysia's default 422 instead of the 400 documented in the OpenAPI detail.
+    .onError({ as: 'global' }, ({ code, error, set, request }) => {
         // Extract path for logging
         const path = new URL(request.url).pathname;
 

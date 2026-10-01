@@ -2,8 +2,11 @@
 # Enable coverage reporting
 coverage = true
 
-# Coverage thresholds (minimum required)
-coverageThreshold = { lines = 95, functions = 95, branches = 95 }
+# There is deliberately no `coverageThreshold` here. Bun has no such option —
+# the key is Jest/Vitest syntax that Bun ignores silently, which is how a 95%
+# threshold sat in this file for months while the project ran at 82% and
+# nothing failed. The real gate is `bun run test:coverage`, which runs the
+# tests, writes an lcov report and checks it via scripts/check-coverage.ts.
 
 # Test timeout in milliseconds
 testTimeout = 5000
